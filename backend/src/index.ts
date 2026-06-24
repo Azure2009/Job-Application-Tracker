@@ -1,14 +1,15 @@
 import express from 'express';
-import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import cors from 'cors'
+import { Pool } from 'pg';
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
-
 app.use(express.json());
+app.use(cors());
 
 const pool = new Pool({
 
@@ -39,7 +40,7 @@ app.post('/applications', async (req, res) => {
 
     );
 
-    res.status(201).json(result.rows[0])
+    res.status(201).json(result.rows[0]);
 
 });
 
