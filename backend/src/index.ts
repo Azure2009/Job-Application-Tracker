@@ -44,6 +44,16 @@ app.post('/applications', async (req, res) => {
 
 });
 
+app.delete('/applications/:id', async (req, res) => {
+
+    const id = req.params.id
+
+    await pool.query('DELETE FROM applications WHERE id = $1', [id]);
+
+    res.status(204).send()
+
+
+})
 
 app.listen(PORT, () => {
 

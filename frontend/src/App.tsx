@@ -34,6 +34,8 @@ function daysSinceApplied(d: string): number {
 
 }
 
+
+
 function App() {
 
   const [applications, setApplications] = useState<Application[]>([]);
@@ -54,6 +56,17 @@ function App() {
 
   }, []);
 
+  async function deleteApplication (id: number) {
+
+  fetch(`http://localhost:3000/applications/${id}`, 
+    {
+      method: 'DELETE'
+
+  })
+  .then(() => setApplications((prev) => prev.filter((app) => app.id !== id)))
+  
+}
+
   return (
     <div>
       <h1>Job Application Tracker</h1>
@@ -61,7 +74,11 @@ function App() {
       <ul>
         {applications.map((app) => (
           <li key={app.id}>
-            {app.company_name} - {app.role_title} ({formatStatus(app.status)}) - {app.notes = 'no reply yet'} - Days Since Applied: {daysSinceApplied(app.applied_date)} 
+            {app.company_name} - 
+            {app.role_title} ({formatStatus(app.status)}) - 
+            {app.notes = 'no reply yet'} - 
+            Days Since Applied: {daysSinceApplied(app.applied_date)}
+            <input type='button' value='Delete' onClick={() => deleteApplication(app.id)}/> 
           </li>
         ))}
       </ul>
