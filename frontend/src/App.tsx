@@ -22,7 +22,6 @@ function formatStatus(status: string): string {
 
 }
 
-
 function daysSinceApplied(d: string): number {
 
   const applied_date = new Date(d);
@@ -39,7 +38,13 @@ function App() {
 
   const [applications, setApplications] = useState<Application[]>([]);
 
-  const [visibility, setVisibility] = useState(true);
+  const [isHidden, setIsHidden] = useState<boolean>(true);
+
+  const [companyName, setCompanyName] = useState<string>('');
+
+  const [roleTitle, setRoleTitle] = useState<string>('');
+
+  const [notes, setNotes] = useState<string>('');
 
   useEffect(() => {
 
@@ -52,7 +57,7 @@ function App() {
   return (
     <div>
       <h1>Job Application Tracker</h1>
-      <input type="button" value="Add New Application" onClick={() => setVisibility(false)}/>
+      <input type='button' value='Add New Application' onClick={() => setIsHidden(false)}/>
       <ul>
         {applications.map((app) => (
           <li key={app.id}>
@@ -61,17 +66,72 @@ function App() {
         ))}
       </ul>
 
-      <div className='newApplicationForm' hidden={visibility}>
+      <div className='newApplicationForm' hidden={isHidden}>
 
-        <form>
+        <form onSubmit={ async (event) => {
 
-          <textarea name="company_name" id="company_name"></textarea>
+          event.preventDefault();
 
-          <textarea name="role_title" id="role_title"></textarea>
+          fetch(`http://localhost:3000/applications`, {
+            method: 'POST', 
+            headers: {
 
-          <textarea name="notes" id="notes"></textarea>
+              'Content-Type': 'application/json'
+
+            },
+            body: JSON.stringify({
+
+              companyName,
+              roleTitle,
+              notes
+
+            })
+          
+          })
+          .then((res) => res.json())
+          .then((newApp) => setApplications((prev) => [...prev, newApp]))
+          .then(() => {
+
+            setCompanyName(''); 
+            setRoleTitle(''); 
+            setNotes(''); 
+            setIsHidden(true);
+          
+          })
+
+        }}>
+        
+          <label htmlFor='company_name'>Company Name</label>
+          <input 
+          type='text' 
+          name='company_name' 
+          id='company_name'
+          value={companyName}
+          onChange={(event) => setCompanyName(event.target.value)}
+          />
+
+          <label htmlFor='role_title'>Role Title</label>
+          <input 
+          type='text' 
+          name='role_title' 
+          id='role_title'
+          value={roleTitle}
+          onChange={(event) => setRoleTitle(event.target.value)}
+          />
+
+          <label htmlFor='notes'>Notes(Optional)</label>
+          <textarea 
+          name='notes'
+          id='notes'
+          value={notes ?? ''}
+          onChange={(event) => setNotes(event.target.value)}> 
+          </textarea>
+
+          <input type='submit' value='Submit'/>
 
         </form>
+
+        <input type='button' value='Cancel' onClick={() => setIsHidden(true)}/>
 
       </div>
 

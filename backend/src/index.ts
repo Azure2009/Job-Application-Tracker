@@ -31,12 +31,12 @@ app.get('/applications', async (req, res) => {
 
 app.post('/applications', async (req, res) => {
 
-    const {company_name, role_title} = req.body;
+    const {companyName, roleTitle, notes = null} = req.body;
 
     const result = await pool.query(
 
-        'INSERT INTO applications(company_name, role_title) VALUES ($1, $2) RETURNING *',
-        [company_name, role_title]
+        'INSERT INTO applications(company_name, role_title, notes) VALUES ($1, $2, $3) RETURNING *',
+        [companyName, roleTitle, notes]
 
     );
 
