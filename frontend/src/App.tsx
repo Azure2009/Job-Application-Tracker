@@ -11,16 +11,16 @@ interface Application {
 
 }
 
-function formatStatus(status: string): string {
+// function formatStatus(status: string): string {
 
-  const trimmed = status.trim();
+//   const trimmed = status.trim();
 
-  const first_letter = trimmed[0].toUpperCase();
-  const result = first_letter.concat(trimmed.slice(1));
+//   const first_letter = trimmed[0].toUpperCase();
+//   const result = first_letter.concat(trimmed.slice(1));
 
-  return result;
+//   return result;
 
-}
+// }
 
 function daysSinceApplied(d: string): number {
 
@@ -34,8 +34,6 @@ function daysSinceApplied(d: string): number {
 
 }
 
-
-
 function App() {
 
   const [applications, setApplications] = useState<Application[]>([]);
@@ -47,6 +45,19 @@ function App() {
   const [roleTitle, setRoleTitle] = useState<string>('');
 
   const [notes, setNotes] = useState<string>('');
+
+  const [editingId, setEditingId] = useState<number | null>();
+
+  const [editingDraft, setEditingDraft] = useState< Application | null>(null);
+
+  function resetForm() {
+
+    setCompanyName('');
+    setRoleTitle('')
+    setNotes('')
+    setIsHidden(true)
+
+  }
 
   useEffect(() => {
 
@@ -67,18 +78,167 @@ function App() {
   
 }
 
+  async function updateStatus (id: number, status: string) {
+
+  fetch(`http://localhost:3000/applications/${id}`, 
+    {
+      method: 'PATCH',
+      headers: {
+
+        'Content-Type': 'application/json'
+
+      },  
+      body: JSON.stringify({
+
+        status
+
+      })
+       
+  }).then((res) => res.json())
+    .then((updatedApp) => {
+
+      setApplications((prev) => prev.map((app) =>
+
+        app.id === id? updatedApp : app 
+
+      ))
+
+    })
+  
+  
+}
+
+  async function saveEdit(id: number) {
+
+    fetch(`http://localhost:3000/applications/${id}`, {
+
+      method: 'PATCH',
+      headers: {
+
+        'Content-Type' : 'application/json'
+
+      }, 
+      body: JSON.stringify({
+
+        company_name : editingDraft?.company_name,
+        role_title : editingDraft?.role_title,
+        notes: editingDraft?.notes
+
+      })
+
+
+    })
+    .then((res) => res.json())
+    .then((updatedApp) => {
+
+      setApplications((prev) => prev.map((app) =>
+
+        app.id === id? updatedApp : app 
+
+      ))
+      setEditingId(null)
+      setEditingDraft(null)
+
+    })
+
+
+
+  }
+  
   return (
     <div>
       <h1>Job Application Tracker</h1>
       <input type='button' value='Add New Application' onClick={() => setIsHidden(false)}/>
       <ul>
-        {applications.map((app) => (
+        {applications.map((app) => (  
+
           <li key={app.id}>
+            {editingId === app.id ? 
+            
+            <>
+            <input
+            type='text'
+            id='company_name' 
+            value={editingDraft?. company_name ?? ''}
+            onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
+            />
+
+            <input
+            type='text'
+            id='role_title' 
+            value={editingDraft?. role_title ?? ''}
+            onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
+            />
+
+            <input
+            type='text'
+            id='notes' 
+            value={editingDraft?. notes ?? ''}
+            onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}  
+            />
+
+            <input 
+            type="button" value="Cancel" 
+            onClick={() => {
+
+              setEditingId(null);
+
+              setEditingDraft(null);
+
+            }}
+            />
+
+            <input 
+            type="button" value="Save" 
+            onClick={() => {
+
+              saveEdit(editingId)
+
+            }}
+            />
+
+            </>
+            
+            : 
+            
+            <> 
             {app.company_name} - 
-            {app.role_title} ({formatStatus(app.status)}) - 
-            {app.notes = 'no reply yet'} - 
+            {app.role_title} <select name="statuses" id="statuses" value={app.status}
+            onChange={(event) => {
+
+              updateStatus(app.id, event.target.value);
+
+            }}>
+            <option value='applied'>applied</option>
+            <option value='interview'>interview</option>
+            <option value='offer'>offer</option>
+            <option value='rejected'>rejected</option>
+            </select> - 
+            {app.notes} - 
             Days Since Applied: {daysSinceApplied(app.applied_date)}
-            <input type='button' value='Delete' onClick={() => deleteApplication(app.id)}/> 
+            <input type='button' value='Delete' onClick={() => {
+              
+              const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
+              
+              if (deleteConfirmed) {
+
+                deleteApplication(app.id);
+
+              }
+
+              }}/>
+ 
+            <input type="button" value="Edit" onClick={() => {
+
+              setEditingId(app.id);
+
+              setEditingDraft({...app});
+
+            }}/>
+            </>
+            
+            }
+             
           </li>
         ))}
       </ul>
@@ -107,14 +267,7 @@ function App() {
           })
           .then((res) => res.json())
           .then((newApp) => setApplications((prev) => [...prev, newApp]))
-          .then(() => {
-
-            setCompanyName(''); 
-            setRoleTitle(''); 
-            setNotes(''); 
-            setIsHidden(true);
-          
-          })
+          .then(() => {resetForm()})
 
         }}>
         
@@ -148,7 +301,15 @@ function App() {
 
         </form>
 
-        <input type='button' value='Cancel' onClick={() => setIsHidden(true)}/>
+        <input type='button' value='Cancel' onClick={() => {
+          
+          const userConfirmed = confirm('Are you sure you want to cancel? Your input will be lost.');
+          
+          if (userConfirmed) {
+            
+            resetForm()
+
+          }}}/>
 
       </div>
 
