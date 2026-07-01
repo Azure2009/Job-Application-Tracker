@@ -46,7 +46,7 @@ function App() {
 
   const [notes, setNotes] = useState<string>('');
 
-  const [editingId, setEditingId] = useState<number | null>();
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const [editingDraft, setEditingDraft] = useState< Application | null>(null);
 
@@ -192,7 +192,11 @@ function App() {
             type="button" value="Save" 
             onClick={() => {
 
-              saveEdit(editingId)
+              if (editingId !== null) {
+
+                saveEdit(editingId);
+                
+              }
 
             }}
             />

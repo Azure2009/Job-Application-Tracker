@@ -1,7 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors'
+import cors from 'cors';
 import { Pool } from 'pg';
+import { google } from 'googleapis';
 
 dotenv.config();
 
@@ -16,6 +17,13 @@ const pool = new Pool({
     connectionString : process.env.DATABASE_URL,
 
 });
+
+const oauth2Client = new google.auth.OAuth2(
+
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+);
 
 interface UpdatableApplicationFields {
 
@@ -117,6 +125,41 @@ app.patch('/applications/:id', async (req, res) => {
 
   const result = await pool.query(query, values);
   res.json(result.rows[0]);
+});
+
+app.get('/auth/google', async (req, res) => {
+
+    const url = oauth2Client.generateAuthUrl({access_type: 'offline', scope: ['https://www.googleapis.com/auth/gmail.readonly']});
+
+    res.redirect(url);
+
+
+});
+
+app.get('/auth/google/callback', async (req, res) => {
+
+    const code = req.query.code as string;
+
+    const { tokens } = await oauth2Client.getToken(code);
+
+    if (!tokens.refresh_token) {
+
+        res.status(400).send('No refresh token received - try disconnecting and reconnecting Gmail.');
+        return;
+
+    }
+
+    oauth2Client.setCredentials(tokens);
+    const oauth2 = google.oauth2({version: 'v2', auth: oauth2Client});
+    const userInfo = await oauth2.userinfo.get();
+    const email = userInfo.data.email;
+
+    await pool.query('INSERT INTO gmail_tokens (user_account, refresh_token) VALUES ($1, $2) ON CONFLICT (user_account) DO UPDATE SET refresh_token = EXCLUDED.refresh_token', 
+        [email, tokens.refresh_token]
+    );
+
+    res.redirect('http://localhost:5173/');
+
 });
 
 app.listen(PORT, () => {
