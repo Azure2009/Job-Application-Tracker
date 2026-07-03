@@ -129,7 +129,16 @@ app.patch('/applications/:id', async (req, res) => {
 
 app.get('/auth/google', async (req, res) => {
 
-    const url = oauth2Client.generateAuthUrl({access_type: 'offline', scope: ['https://www.googleapis.com/auth/gmail.readonly']});
+    const url = oauth2Client.generateAuthUrl({
+        access_type: 'offline', 
+        scope: [
+        'https://www.googleapis.com/auth/gmail.readonly',
+        'openid',
+        'email'
+        ],
+        prompt: 'consent'
+    
+    });
 
     res.redirect(url);
 
@@ -149,10 +158,30 @@ app.get('/auth/google/callback', async (req, res) => {
 
     }
 
+    if (!tokens.id_token) {
+
+        res.status(400).send('No id token received.')
+        return;
+
+    }
+
     oauth2Client.setCredentials(tokens);
-    const oauth2 = google.oauth2({version: 'v2', auth: oauth2Client});
-    const userInfo = await oauth2.userinfo.get();
-    const email = userInfo.data.email;
+
+    const ticket = await oauth2Client.verifyIdToken({
+
+        idToken: tokens.id_token!,
+        audience: process.env.GOOGLE_CLIENT_ID!
+
+    });
+
+    const email = ticket.getPayload()?.email;
+
+    if (!email) {
+
+        res.status(400).send('No email received.')
+        return;
+
+    }
 
     await pool.query('INSERT INTO gmail_tokens (user_account, refresh_token) VALUES ($1, $2) ON CONFLICT (user_account) DO UPDATE SET refresh_token = EXCLUDED.refresh_token', 
         [email, tokens.refresh_token]
@@ -160,6 +189,74 @@ app.get('/auth/google/callback', async (req, res) => {
 
     res.redirect('http://localhost:5173/');
 
+});
+
+app.get('/sync', async (req, res) => {
+
+    const result = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
+
+    const refresh_token = result.rows[0]?.refresh_token;
+
+    if (!refresh_token) {
+
+        console.log('No refresh token received.');
+        return;
+
+    }
+
+    oauth2Client.setCredentials({refresh_token: refresh_token!});
+
+    // Start retrieving messages from user's gmail
+
+    const gmail = google.gmail({version:'v1', auth: oauth2Client});
+
+    const response = await gmail.users.messages.list({
+
+        userId: 'me',
+        q: 'subject:("Thank you for applying" OR interview OR "Your application" OR offer)after:2026/01/01 category:primary',
+        maxResults: 50
+
+    });
+
+    const messages = response.data.messages
+
+    if (!messages) {
+
+        console.log('No messages received.')
+        return;
+
+    }
+
+    const emailDetails = await Promise.all(
+        
+        messages.map(async (msg) => {
+
+        const response = await gmail.users.messages.get({
+
+            userId: 'me',
+            id: msg.id!,
+            format: 'metadata',
+            metadataHeaders: ['Subject', 'From', 'Date']
+
+        })
+
+        const snippet = response.data.snippet ?? '';
+
+        const headers = response.data.payload?.headers ?? [];
+
+        const subject = headers.find((h) => h.name === 'Subject')?.value ?? 'No Subject';
+
+        const from = headers.find((h) => h.name === 'From')?.value ?? 'Unknown';
+
+        const date = headers.find((h) => h.name === 'Date')?.value ?? '';
+
+        return {id: msg.id!, snippet, subject, from, date};
+
+    }))
+
+    res.json(emailDetails);
+
+    
 });
 
 app.listen(PORT, () => {

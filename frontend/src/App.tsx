@@ -11,17 +11,6 @@ interface Application {
 
 }
 
-// function formatStatus(status: string): string {
-
-//   const trimmed = status.trim();
-
-//   const first_letter = trimmed[0].toUpperCase();
-//   const result = first_letter.concat(trimmed.slice(1));
-
-//   return result;
-
-// }
-
 function daysSinceApplied(d: string): number {
 
   const applied_date = new Date(d);
@@ -33,6 +22,8 @@ function daysSinceApplied(d: string): number {
   return Math.floor(diffMs/ (1000 * 60 * 60 * 24));
 
 }
+
+
 
 function App() {
 
@@ -49,6 +40,11 @@ function App() {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const [editingDraft, setEditingDraft] = useState< Application | null>(null);
+
+  async function sync() {
+  fetch(`http://localhost:3000/sync`, {method: 'GET'})
+
+}
 
   function resetForm() {
 
@@ -316,6 +312,8 @@ function App() {
           }}}/>
 
       </div>
+
+      <input type="button" value="Sync now" onClick={() => {sync()}}/>
 
     </div>
   )
