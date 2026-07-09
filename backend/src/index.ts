@@ -79,6 +79,18 @@ function buildUpdateQuery (id: string, body: Partial<UpdatableApplicationFields>
 
 }
 
+function classifyEmail(subject: string): string {
+
+        const lower = subject.toLowerCase();
+
+        if (lower.includes('interview')) return 'interview';
+        if (lower.includes('offer')) return 'offer';
+        if (lower.includes('regret') || lower.includes('unfortunately') || lower.includes('not moving forward')) return 'rejected';
+        if (lower.includes('thank you for applying') || lower.includes('application received') || lower.includes('your application')) return 'applied';
+        return 'other';
+
+    }
+
 app.get('/', (req, res) => {
     res.send('Job Tracker API is running');
 });
@@ -254,9 +266,35 @@ app.get('/sync', async (req, res) => {
 
     }))
 
-    res.json(emailDetails);
+    await Promise.all(
 
-    
+        emailDetails.map((email) => ({ // Create a new shape for the existing object.
+
+            ...email,
+            status: classifyEmail(email.subject),
+            company_name: email.from.split('<')[0]?.trim() ?? 'Unknown Company',
+                        
+        }))
+        .filter((email) => email.status !== 'other') // filter out emails with status value 'other'
+        .map(async (email) => { // wait for each new shaped object to be done being inserted in the applications table
+
+            await pool.query(`
+                    INSERT INTO applications(company_name, status, applied_date, notes, gmail_message_id) 
+                    VALUES ($1, $2, $3, $4, $5)
+                    ON CONFLICT (gmail_message_id) DO NOTHING`, 
+                    [email.company_name, email.status, email.date? new Date(email.date): new Date(), email.snippet, email.id]
+                );
+
+
+
+        })
+
+
+
+    )
+
+    res.json({message: 'Sync complete!'});
+
 });
 
 app.listen(PORT, () => {

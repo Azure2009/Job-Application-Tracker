@@ -43,6 +43,7 @@ function App() {
 
   async function sync() {
   fetch(`http://localhost:3000/sync`, {method: 'GET'})
+  .then()
 
 }
 
