@@ -154,7 +154,7 @@ app.get('/auth/google', async (req, res) => {
     
     });
 
-    res.redirect(url);
+    res.redirect(url)
 
 
 });

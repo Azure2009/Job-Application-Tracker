@@ -54,7 +54,13 @@ function App() {
     setIsSyncing(false);
   })
 
-}
+  }
+
+  function connectGmail() {
+
+    window.location.href = 'http://localhost:3000/auth/google';
+    
+  }
 
   function resetForm() {
 
@@ -155,6 +161,78 @@ function App() {
     <div>
       <h1>Job Application Tracker</h1>
       <input type='button' value='Add New Application' onClick={() => setIsHidden(false)}/>
+      <input type="button" value="Connect gmail account" onClick={() => connectGmail()}/>
+
+      <div className='newApplicationForm' hidden={isHidden}>
+
+        <form onSubmit={ async (event) => {
+
+          event.preventDefault();
+
+          fetch(`http://localhost:3000/applications`, {
+            method: 'POST', 
+            headers: {
+
+              'Content-Type': 'application/json'
+
+            },
+            body: JSON.stringify({
+
+              companyName,
+              roleTitle,
+              notes
+
+            })
+          
+          })
+          .then((res) => res.json())
+          .then((newApp) => setApplications((prev) => [...prev, newApp]))
+          .then(() => {resetForm()})
+
+        }}>
+        
+          <label htmlFor='company_name'>Company Name</label>
+          <input 
+          type='text' 
+          name='company_name' 
+          id='company_name'
+          value={companyName}
+          onChange={(event) => setCompanyName(event.target.value)}
+          />
+
+          <label htmlFor='role_title'>Role Title</label>
+          <input 
+          type='text' 
+          name='role_title' 
+          id='role_title'
+          value={roleTitle}
+          onChange={(event) => setRoleTitle(event.target.value)}
+          />
+
+          <label htmlFor='notes'>Notes(Optional)</label>
+          <textarea 
+          name='notes'
+          id='notes'
+          value={notes ?? ''}
+          onChange={(event) => setNotes(event.target.value)}> 
+          </textarea>
+
+          <input type='submit' value='Submit'/>
+
+        </form>
+
+        <input type='button' value='Cancel' onClick={() => {
+          
+          const userConfirmed = confirm('Are you sure you want to cancel? Your input will be lost.');
+          
+          if (userConfirmed) {
+            
+            resetForm()
+
+          }}}/>
+
+      </div>
+
       <ul>
         {applications.map((app) => (  
 
@@ -252,76 +330,6 @@ function App() {
           </li>
         ))}
       </ul>
-
-      <div className='newApplicationForm' hidden={isHidden}>
-
-        <form onSubmit={ async (event) => {
-
-          event.preventDefault();
-
-          fetch(`http://localhost:3000/applications`, {
-            method: 'POST', 
-            headers: {
-
-              'Content-Type': 'application/json'
-
-            },
-            body: JSON.stringify({
-
-              companyName,
-              roleTitle,
-              notes
-
-            })
-          
-          })
-          .then((res) => res.json())
-          .then((newApp) => setApplications((prev) => [...prev, newApp]))
-          .then(() => {resetForm()})
-
-        }}>
-        
-          <label htmlFor='company_name'>Company Name</label>
-          <input 
-          type='text' 
-          name='company_name' 
-          id='company_name'
-          value={companyName}
-          onChange={(event) => setCompanyName(event.target.value)}
-          />
-
-          <label htmlFor='role_title'>Role Title</label>
-          <input 
-          type='text' 
-          name='role_title' 
-          id='role_title'
-          value={roleTitle}
-          onChange={(event) => setRoleTitle(event.target.value)}
-          />
-
-          <label htmlFor='notes'>Notes(Optional)</label>
-          <textarea 
-          name='notes'
-          id='notes'
-          value={notes ?? ''}
-          onChange={(event) => setNotes(event.target.value)}> 
-          </textarea>
-
-          <input type='submit' value='Submit'/>
-
-        </form>
-
-        <input type='button' value='Cancel' onClick={() => {
-          
-          const userConfirmed = confirm('Are you sure you want to cancel? Your input will be lost.');
-          
-          if (userConfirmed) {
-            
-            resetForm()
-
-          }}}/>
-
-      </div>
 
       <input type="button" value="Sync now" onClick={() => {sync()}}/>
       {isSyncing && <span className='spinner'></span>}
