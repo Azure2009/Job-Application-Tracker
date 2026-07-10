@@ -41,9 +41,18 @@ function App() {
 
   const [editingDraft, setEditingDraft] = useState< Application | null>(null);
 
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
   async function sync() {
-  fetch(`http://localhost:3000/sync`, {method: 'GET'})
-  .then()
+
+  setIsSyncing(true);
+  await fetch(`http://localhost:3000/sync`)
+  .then(() => fetch(`http://localhost:3000/applications`))
+  .then((res) => res.json())
+  .then((apps) => {
+    setApplications(apps);
+    setIsSyncing(false);
+  })
 
 }
 
@@ -315,7 +324,7 @@ function App() {
       </div>
 
       <input type="button" value="Sync now" onClick={() => {sync()}}/>
-
+      {isSyncing && <span className='spinner'></span>}
     </div>
   )
 }

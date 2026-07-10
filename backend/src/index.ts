@@ -51,7 +51,9 @@ function buildUpdateQuery (id: string, body: Partial<UpdatableApplicationFields>
 
         fields.push('role_title = $' + (values.length + 1));
 
-        values.push(body.role_title);
+        if (body.role_title == '') values.push('Unknown Role')
+        else values.push(body.role_title); 
+
     }
 
     if ('status' in body ) {
@@ -110,7 +112,7 @@ app.post('/applications', async (req, res) => {
     const result = await pool.query(
 
         'INSERT INTO applications(company_name, role_title, notes) VALUES ($1, $2, $3) RETURNING *',
-        [companyName, roleTitle, notes==''?  'No notes provided': notes]
+        [companyName==''? 'Unknown Company': companyName, roleTitle==''? 'Unknown Role': roleTitle, notes==''?  'No notes provided': notes]
 
     );
 
@@ -234,7 +236,7 @@ app.get('/sync', async (req, res) => {
 
     if (!messages) {
 
-        console.log('No messages received.')
+        res.json({message: 'No emails received.'})
         return;
 
     }
