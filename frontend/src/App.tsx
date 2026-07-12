@@ -24,7 +24,6 @@ function daysSinceApplied(d: string): number {
 }
 
 
-
 function App() {
 
   const [applications, setApplications] = useState<Application[]>([]);
@@ -42,6 +41,8 @@ function App() {
   const [editingDraft, setEditingDraft] = useState< Application | null>(null);
 
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   async function sync() {
 
@@ -153,16 +154,21 @@ function App() {
 
     })
 
-
-
   }
   
   return (
-    <div>
-      <h1>Job Application Tracker</h1>
-      <input type='button' value='Add New Application' onClick={() => setIsHidden(false)}/>
-      <input type="button" value="Connect gmail account" onClick={() => connectGmail()}/>
+    <div className='mainFrame'>
+      <div className='topContainer'>
+        <h1 id='app_title'>Job Application Tracker</h1>
+        <input id='sidePanelButton' type="button" value="Open side panel" onClick={() => setIsOpen(true)}/>
+      </div>
 
+      <aside id='sidePanel' className={isOpen? 'open' : ''}>
+        <p>My side panel</p>
+        <button onClick={() => setIsOpen(false)}>✕</button>
+      </aside>
+
+      <input id='addApplication' type='button' value='Add New Application' onClick={() => setIsHidden(false)}/>
       <div className='newApplicationForm' hidden={isHidden}>
 
         <form onSubmit={ async (event) => {
@@ -232,6 +238,8 @@ function App() {
           }}}/>
 
       </div>
+      
+      <div className='applications'>
 
       <ul>
         {applications.map((app) => (  
@@ -330,9 +338,10 @@ function App() {
           </li>
         ))}
       </ul>
-
+      </div>
       <input type="button" value="Sync now" onClick={() => {sync()}}/>
       {isSyncing && <span className='spinner'></span>}
+      <input type="button" value="Connect a gmail account" onClick={() => connectGmail()}/>
     </div>
   )
 }
