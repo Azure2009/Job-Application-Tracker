@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { List, Table2, Plus, Columns2, TextAlignJustify } from 'lucide-react'
+
 
 interface Application {
 
@@ -157,18 +159,31 @@ function App() {
   }
   
   return (
-    <div className='mainFrame'>
-      <div className='topContainer'>
-        <h1 id='app_title'>Job Application Tracker</h1>
-        <input id='sidePanelButton' type="button" value="Open side panel" onClick={() => setIsOpen(true)}/>
+    <>
+      
+      <div className='flex items-center justify-between p-4'>
+        <p className="text-3xl">Job Application Tracker</p>
+        <button className='cursor-pointer text-slate-500' onClick={() => setIsOpen(true)}>
+          <TextAlignJustify/>
+        </button>        
+      </div>
+      <div className='m-4 flex'> 
+        <button className='flex text-white cursor-pointer border-solid rounded-xl items-center bg-indigo-500 p-2' onClick={() => setIsHidden(false)}><Plus/><p className='text-xl'>New Job</p></button>        
+        
       </div>
 
-      <aside id='sidePanel' className={isOpen? 'open' : ''}>
-        <p>My side panel</p>
-        <button onClick={() => setIsOpen(false)}>✕</button>
+      <aside className={`fixed top-0 right-0 z-10 h-full w-10% bg-indigo-500 transition-transform duration-300 ease-out p-4 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className='p-2 flex h-10 items-center text-2xl text-slate-400'>
+          <button className='ml-auto cursor-pointer' onClick={() => setIsOpen(false)}>✕</button>
+        </div>
+        <div className='grid h-1/3 justify-items-start text-5xl text-white p-2'>
+          <button className='flex items-center cursor-pointer'><Columns2/></button>
+          <button className='flex items-center cursor-pointer'><List/></button>
+          <button className='flex items-center cursor-pointer'><Table2/></button>
+        </div>
       </aside>
 
-      <input id='addApplication' type='button' value='Add New Application' onClick={() => setIsHidden(false)}/>
+      
       <div className='newApplicationForm' hidden={isHidden}>
 
         <form onSubmit={ async (event) => {
@@ -342,7 +357,7 @@ function App() {
       <input type="button" value="Sync now" onClick={() => {sync()}}/>
       {isSyncing && <span className='spinner'></span>}
       <input type="button" value="Connect a gmail account" onClick={() => connectGmail()}/>
-    </div>
+    </>
   )
 }
 

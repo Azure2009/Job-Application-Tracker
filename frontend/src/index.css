@@ -1,3 +1,7 @@
+@import "tailwindcss";
+
+/* 
+
 .mainFrame {
   position: relative;
 }
@@ -13,7 +17,49 @@
 }
 
 #sidePanelButton {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  position: relative;
+  display: inline;
   margin-left: auto;
+}
+
+#closeButtonContainer {
+
+  position: relative;
+  display: flex;
+  height: 50px;
+  align-items: center;
+
+}
+
+#closeButton {
+
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: 10px;
+
+}
+
+#sidePanelOptions {
+
+  position: relative;
+  height: 200px;
+  display: grid;
+  justify-content: space-between;
+
+}
+
+#sidePanelOptions a {
+
+  margin-left: 10px;  
+  font-size: 25px;
+  text-decoration: none;
+  cursor: pointer;
+
 }
 
 #addApplication {
@@ -58,4 +104,4 @@ aside p {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
+} */
