@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { RotateCcw, Search, List, Table2, Plus, Columns2, TextAlignJustify } from 'lucide-react'
 
-
 interface Application {
 
   id: number,
@@ -161,8 +160,9 @@ function App() {
   return (
     <>
       
-      <div className='flex items-center justify-between p-4'>
+      <div className='flex relative items-center justify-between p-4'>
         <p className="text-3xl">Job Application Tracker</p>
+        <button className='absolute flex items-center left-300 cursor-pointer text-slate-700 p-2 rounded-full text-lg justify-center text-slate-500 border-none hover:text-indigo-500 transition-text duration-300' onClick={() => connectGmail()}>Connect gmail</button>
         <div className='relative'>
         <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2'/>
         <input type="text" className='rounded-full shadow-lg p-2 pl-10 inline-lg outline-none text-slate-500' placeholder='Search'/>
@@ -172,8 +172,7 @@ function App() {
         </button>        
       </div>
       <div className='m-4 flex'> 
-        <button className='flex text-white cursor-pointer border-solid rounded-xl items-center bg-indigo-500 p-2' onClick={() => setIsHidden(false)}><Plus/><p className='text-xl'>New Job</p></button>        
-        
+        <button className='flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2' onClick={() => setIsHidden(false)}><Plus/> <p>New Job</p></button>                
       </div>
 
       <aside className={`fixed top-0 right-0 z-10 h-full w-10% bg-indigo-500 transition-transform duration-300 ease-out p-4 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
@@ -194,83 +193,89 @@ function App() {
             <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-14 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Table</div>
           </div>
         </div>
-        <div className='relative justify-center items-center top-96 p-2'>
-          <button className='flex text-white' onClick={() => sync()}><RotateCcw/></button>
+        <div className='m-2 flex relative top-96 group'>
+          <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-14 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Sync</div>
+          <button className='text-white cursor-pointer' onClick={() => sync()}><RotateCcw/></button>          
           </div>
       </aside>
 
-      
-      <div className='newApplicationForm' hidden={isHidden}>
+      <div className='grid grid-cols-4 ml-32 mr-24 gap-4'>
 
-        <form onSubmit={ async (event) => {
+        <div className='z-20 fixed rounded-full bg-slate-200 place-self-center-safe p-4' hidden={isHidden}>
 
-          event.preventDefault();
+          <form onSubmit={ async (event) => {
 
-          fetch(`http://localhost:3000/applications`, {
-            method: 'POST', 
-            headers: {
+            event.preventDefault();
 
-              'Content-Type': 'application/json'
+            fetch(`http://localhost:3000/applications`, {
+              method: 'POST', 
+              headers: {
 
-            },
-            body: JSON.stringify({
+                'Content-Type': 'application/json'
 
-              companyName,
-              roleTitle,
-              notes
+              },
+              body: JSON.stringify({
 
-            })
-          
-          })
-          .then((res) => res.json())
-          .then((newApp) => setApplications((prev) => [...prev, newApp]))
-          .then(() => {resetForm()})
+                companyName,
+                roleTitle,
+                notes
 
-        }}>
-        
-          <label htmlFor='company_name'>Company Name</label>
-          <input 
-          type='text' 
-          name='company_name' 
-          id='company_name'
-          value={companyName}
-          onChange={(event) => setCompanyName(event.target.value)}
-          />
-
-          <label htmlFor='role_title'>Role Title</label>
-          <input 
-          type='text' 
-          name='role_title' 
-          id='role_title'
-          value={roleTitle}
-          onChange={(event) => setRoleTitle(event.target.value)}
-          />
-
-          <label htmlFor='notes'>Notes(Optional)</label>
-          <textarea 
-          name='notes'
-          id='notes'
-          value={notes ?? ''}
-          onChange={(event) => setNotes(event.target.value)}> 
-          </textarea>
-
-          <input type='submit' value='Submit'/>
-
-        </form>
-
-        <input type='button' value='Cancel' onClick={() => {
-          
-          const userConfirmed = confirm('Are you sure you want to cancel? Your input will be lost.');
-          
-          if (userConfirmed) {
+              })
             
-            resetForm()
+            })
+            .then((res) => res.json())
+            .then((newApp) => setApplications((prev) => [...prev, newApp]))
+            .then(() => {resetForm()})
 
-          }}}/>
+          }}>
+          
+            <label className='absolute' htmlFor='company_name'>Company Name</label>
+            <input 
+            type='text' 
+            name='company_name' 
+            id='company_name'
+            value={companyName}
+            onChange={(event) => setCompanyName(event.target.value)}
+            />
 
-      </div>
-      
-      <div className='applications'>
+            <label className='absolute' htmlFor='role_title'>Role Title</label>
+            <input 
+            type='text' 
+            name='role_title' 
+            id='role_title'
+            value={roleTitle}
+            onChange={(event) => setRoleTitle(event.target.value)}
+            />
+
+            <label htmlFor='notes'>Notes(Optional)</label>
+            <textarea
+            className='resize-none' 
+            name='notes'
+            id='notes'
+            value={notes ?? ''}
+            onChange={(event) => setNotes(event.target.value)}> 
+            </textarea>
+
+            <input type='submit' value='Submit'/>
+
+          </form>
+
+          <input type='button' value='Cancel' onClick={() => {
+            
+            const userConfirmed = confirm('Are you sure you want to cancel? Your input will be lost.');
+            
+            if (userConfirmed) {
+              
+              resetForm()
+
+            }}}/>
+
+        </div>
+
+        <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Applied</p></div>
+        <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Interview</p></div>
+        <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Rejected</p></div>
+        <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Offered</p></div>
 
       <ul>
         {applications.map((app) => (  
@@ -370,7 +375,6 @@ function App() {
         ))}
       </ul>
       </div>
-      <input type="button" value="Connect a gmail account" onClick={() => connectGmail()}/>
     </>
   )
 }
