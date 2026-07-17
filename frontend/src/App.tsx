@@ -171,9 +171,11 @@ function App() {
           <TextAlignJustify/>
         </button>        
       </div>
-      <div className='m-4 flex'> 
-        <button className='flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2' onClick={() => setIsHidden(false)}><Plus/> <p>New Job</p></button>                
-      </div>
+       
+      <button className='m-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2' onClick={() => setIsHidden(false)}><Plus/> <p>New Job</p></button>                
+      
+      {/* Overlay a blackened screen when add application window is open */}
+      { !isHidden && <div className={`fixed z-4 top-0 left-0 h-1000 w-1000 bg-black/75 transition-opacity duration-300 ${isHidden? 'opacity-0' : 'opacity-100'}`}></div>}
 
       <aside className={`fixed top-0 right-0 z-10 h-full w-10% bg-indigo-500 transition-transform duration-300 ease-out p-4 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
         <div className='p-2 flex h-10 relative items-center text-xl self-center text-slate-400'>
@@ -200,77 +202,6 @@ function App() {
       </aside>
 
       <div className='grid grid-cols-4 ml-32 mr-24 gap-4'>
-
-        <div className='z-20 fixed rounded-full bg-slate-200 place-self-center-safe p-4' hidden={isHidden}>
-
-          <form onSubmit={ async (event) => {
-
-            event.preventDefault();
-
-            fetch(`http://localhost:3000/applications`, {
-              method: 'POST', 
-              headers: {
-
-                'Content-Type': 'application/json'
-
-              },
-              body: JSON.stringify({
-
-                companyName,
-                roleTitle,
-                notes
-
-              })
-            
-            })
-            .then((res) => res.json())
-            .then((newApp) => setApplications((prev) => [...prev, newApp]))
-            .then(() => {resetForm()})
-
-          }}>
-          
-            <label className='absolute' htmlFor='company_name'>Company Name</label>
-            <input 
-            type='text' 
-            name='company_name' 
-            id='company_name'
-            value={companyName}
-            onChange={(event) => setCompanyName(event.target.value)}
-            />
-
-            <label className='absolute' htmlFor='role_title'>Role Title</label>
-            <input 
-            type='text' 
-            name='role_title' 
-            id='role_title'
-            value={roleTitle}
-            onChange={(event) => setRoleTitle(event.target.value)}
-            />
-
-            <label htmlFor='notes'>Notes(Optional)</label>
-            <textarea
-            className='resize-none' 
-            name='notes'
-            id='notes'
-            value={notes ?? ''}
-            onChange={(event) => setNotes(event.target.value)}> 
-            </textarea>
-
-            <input type='submit' value='Submit'/>
-
-          </form>
-
-          <input type='button' value='Cancel' onClick={() => {
-            
-            const userConfirmed = confirm('Are you sure you want to cancel? Your input will be lost.');
-            
-            if (userConfirmed) {
-              
-              resetForm()
-
-            }}}/>
-
-        </div>
 
         <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Applied</p></div>
         <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Interview</p></div>
@@ -375,6 +306,80 @@ function App() {
         ))}
       </ul>
       </div>
+      <div className={`fixed z-20 w-6xl rounded-xl bg-slate-200 top-50 left-50 transition-opacity duration-300 ${isHidden? 'opacity-0': 'opacity-100'}`}>
+
+          <form className='grid grid-cols-2 p-4 gap-x-4' onSubmit={ async (event) => {
+
+            event.preventDefault();
+
+            fetch(`http://localhost:3000/applications`, {
+              method: 'POST', 
+              headers: {
+
+                'Content-Type': 'application/json'
+
+              },
+              body: JSON.stringify({
+
+                companyName,
+                roleTitle,
+                notes
+
+              })
+            
+            })
+            .then((res) => res.json())
+            .then((newApp) => setApplications((prev) => [...prev, newApp]))
+            .then(() => {resetForm()})
+
+          }}>
+            
+            
+              <label className='text-slate-500' htmlFor='company_name'>Company Name</label>
+            
+            
+              <label className='text-slate-500' htmlFor='role_title'>Role Title</label>
+            
+              <input className='rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none p-2'
+              autoComplete='off'
+              type='text' 
+              name='company_name' 
+              id='company_name'
+              value={companyName}
+              onChange={(event) => setCompanyName(event.target.value)}
+              />
+              <input className='rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none p-2'
+              type='text' 
+              name='role_title' 
+              id='role_title'
+              value={roleTitle}
+              onChange={(event) => setRoleTitle(event.target.value)}
+              />
+
+            <label className='col-span-2 mt-4 text-slate-500' htmlFor='notes'>Notes(Optional)</label>
+            <textarea
+            autoComplete='off'
+            className='resize-none col-span-2 rounded-xl border-2 border-slate-300 mb-4 focus:border-indigo-500 focus:outline-none p-2' 
+            name='notes'
+            id='notes'
+            value={notes ?? ''}
+            onChange={(event) => setNotes(event.target.value)}> 
+            </textarea>
+
+            <input className='cursor-pointer rounded-full bg-slate-300 p-2 col-span-2' type='button' value='Cancel' onClick={() => {            
+              const userConfirmed = confirm('Are you sure you want to cancel? Your input will be lost.');            
+              if (userConfirmed) {
+                resetForm()
+            }}}/>
+
+            <input className='border rounded-full p-2 bg-indigo-500 text-white col-span-2 cursor-pointer' type='submit' value='Submit'/>
+            
+            
+
+          </form>          
+
+        </div>
+
     </>
   )
 }
