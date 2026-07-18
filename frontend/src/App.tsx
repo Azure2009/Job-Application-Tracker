@@ -81,6 +81,121 @@ function App() {
 
   }, []);
 
+  function categorizeApps (status: string) {
+
+    return (
+
+      
+      applications.filter((app) => app.status === status)
+      .map((filteredApp) => (
+        
+        <li key={filteredApp.id}>
+                {editingId === filteredApp.id ? 
+                
+                <>
+                <input
+                type='text'
+                id='company_name' 
+                value={editingDraft?. company_name ?? ''}
+                onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
+                />
+
+                <input
+                type='text'
+                id='role_title' 
+                value={editingDraft?. role_title ?? ''}
+                onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
+                />
+
+                <input
+                type='text'
+                id='notes' 
+                value={editingDraft?. notes ?? ''}
+                onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}  
+                />
+
+                <input 
+                type="button" value="Cancel" 
+                onClick={() => {
+
+                  setEditingId(null);
+
+                  setEditingDraft(null);
+
+                }}
+                />
+
+                <input 
+                type="button" value="Save" 
+                onClick={() => {
+
+                  if (editingId !== null) {
+
+                    saveEdit(editingId);
+                    
+                  }
+
+                }}
+                />
+
+                </>
+                
+                : 
+                
+                <>
+                <div className='grid rounded-xl p-2 mb-4 bg-white gap-2 w-64'>
+                  <div className=''>{filteredApp.company_name}</div>
+                  <div className='text-lg font-bold'>{filteredApp.role_title}</div> 
+                  {/* <select name="statuses" id="statuses" value={filteredApp.status}
+                  onChange={(event) => {
+
+                    updateStatus(filteredApp.id, event.target.value);
+
+                  }}>
+                  <option value='applied'>applied</option>
+                  <option value='interview'>interview</option>
+                  <option value='offer'>offer</option>
+                  <option value='rejected'>rejected</option>
+                  </select> - 
+                  {filteredApp.notes} -  */}
+                  <div className='text-slate-500 text-xs'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
+                  <div className='text-xs text-slate-500 items-center'>
+                  <button className='mr-2 bg-slate-200 cursor-pointer p-2' onClick={() => {
+                    
+                    const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
+                    
+                    if (deleteConfirmed) {
+
+                      deleteApplication(filteredApp.id);
+
+                    }
+
+                    }}>Delete</button>
+
+                  <button className='bg-slate-200 cursor-pointer p-2' onClick={() => {
+
+                    setEditingId(filteredApp.id);
+
+                    setEditingDraft({...filteredApp});
+
+                  }}>Edit</button>
+
+                  </div>
+
+                </div>
+                </>
+                
+                }
+                
+              </li>
+
+
+      ))
+
+  )
+
+  }
+
   async function deleteApplication (id: number) {
 
   fetch(`http://localhost:3000/applications/${id}`, 
@@ -175,7 +290,7 @@ function App() {
       <button className='m-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2' onClick={() => setIsHidden(false)}><Plus/> <p>New Job</p></button>                
       
       {/* Overlay a blackened screen when add application window is open */}
-      { !isHidden && <div className={`fixed z-4 top-0 left-0 h-1000 w-1000 bg-black/75 transition-opacity duration-300 ${isHidden? 'opacity-0' : 'opacity-100'}`}></div>}
+      <div className={`fixed z-4 top-0 left-0 h-1000 w-1000 bg-black/75 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible' : 'opacity-100 visible'}`}></div>
 
       <aside className={`fixed top-0 right-0 z-10 h-full w-10% bg-indigo-500 transition-transform duration-300 ease-out p-4 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
         <div className='p-2 flex h-10 relative items-center text-xl self-center text-slate-400'>
@@ -197,116 +312,20 @@ function App() {
         </div>
         <div className='m-2 flex relative top-96 group'>
           <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-14 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Sync</div>
-          <button className='text-white cursor-pointer' onClick={() => sync()}><RotateCcw/></button>          
+          <button className={`text-white cursor-pointer ${isSyncing? 'animate-spin [animation-direction:reverse]':''}`} onClick={() => sync()}><RotateCcw/></button>          
           </div>
       </aside>
 
       <div className='grid grid-cols-4 ml-32 mr-24 gap-4'>
 
-        <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Applied</p></div>
-        <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Interview</p></div>
-        <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Rejected</p></div>
-        <div className='h-full bg-slate-50 justify-items-center-safe rounded-full pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Offered</p></div>
+        <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Applied</p><ul>{categorizeApps('applied')}</ul></div>
+        <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Interview</p><ul>{categorizeApps('interview')}</ul></div>
+        <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Rejected</p><ul>{categorizeApps('rejected')}</ul></div>
+        <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Offered</p><ul>{categorizeApps('offer')}</ul></div>
 
-      <ul>
-        {applications.map((app) => (  
 
-          <li key={app.id}>
-            {editingId === app.id ? 
-            
-            <>
-            <input
-            type='text'
-            id='company_name' 
-            value={editingDraft?. company_name ?? ''}
-            onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
-            />
-
-            <input
-            type='text'
-            id='role_title' 
-            value={editingDraft?. role_title ?? ''}
-            onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
-            />
-
-            <input
-            type='text'
-            id='notes' 
-            value={editingDraft?. notes ?? ''}
-            onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}  
-            />
-
-            <input 
-            type="button" value="Cancel" 
-            onClick={() => {
-
-              setEditingId(null);
-
-              setEditingDraft(null);
-
-            }}
-            />
-
-            <input 
-            type="button" value="Save" 
-            onClick={() => {
-
-              if (editingId !== null) {
-
-                saveEdit(editingId);
-                
-              }
-
-            }}
-            />
-
-            </>
-            
-            : 
-            
-            <> 
-            {app.company_name} - 
-            {app.role_title} <select name="statuses" id="statuses" value={app.status}
-            onChange={(event) => {
-
-              updateStatus(app.id, event.target.value);
-
-            }}>
-            <option value='applied'>applied</option>
-            <option value='interview'>interview</option>
-            <option value='offer'>offer</option>
-            <option value='rejected'>rejected</option>
-            </select> - 
-            {app.notes} - 
-            Days Since Applied: {daysSinceApplied(app.applied_date)}
-            <input type='button' value='Delete' onClick={() => {
-              
-              const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
-              
-              if (deleteConfirmed) {
-
-                deleteApplication(app.id);
-
-              }
-
-              }}/>
- 
-            <input type="button" value="Edit" onClick={() => {
-
-              setEditingId(app.id);
-
-              setEditingDraft({...app});
-
-            }}/>
-            </>
-            
-            }
-             
-          </li>
-        ))}
-      </ul>
       </div>
-      <div className={`fixed z-20 w-6xl rounded-xl bg-slate-200 top-50 left-50 transition-opacity duration-300 ${isHidden? 'opacity-0': 'opacity-100'}`}>
+      <div className={`fixed z-20 w-6xl rounded-xl bg-slate-200 top-50 left-50 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible': 'opacity-100 visible'}`}>
 
           <form className='grid grid-cols-2 p-4 gap-x-4' onSubmit={ async (event) => {
 
@@ -374,12 +393,10 @@ function App() {
 
             <input className='border rounded-full p-2 bg-indigo-500 text-white col-span-2 cursor-pointer' type='submit' value='Submit'/>
             
-            
-
           </form>          
 
         </div>
-
+      
     </>
   )
 }
