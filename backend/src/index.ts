@@ -205,6 +205,14 @@ app.get('/auth/google/callback', async (req, res) => {
 
 });
 
+app.get('/gmaiId', async (req, res) => {
+
+    await pool.query('')
+
+
+
+})
+
 app.get('/sync', async (req, res) => {
 
     const result = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
