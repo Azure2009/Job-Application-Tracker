@@ -8,6 +8,7 @@ interface Application {
   role_title: string,
   status: 'applied' | 'interview' | 'offer' | 'rejected',
   applied_date: string,
+  link: string,
   notes?: string
 
 }
@@ -35,6 +36,8 @@ function App() {
 
   const [roleTitle, setRoleTitle] = useState<string>('');
 
+  const [link, setLink] = useState<string>('');
+
   const [notes, setNotes] = useState<string>('');
 
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -48,7 +51,6 @@ function App() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [showButton, setShowButton] = useState<boolean>(false);
-
 
   // Show Button when scrolled too far down.
   useEffect(() => {
@@ -77,16 +79,16 @@ function App() {
 
   }
 
-  async function getGmailId(id: number) {
-
-    await fetch(`http://localhost:3000/gmailId`, {
-      method: 'GET',
-
-      headers: {
-        'Content-Type':'/application/json'},
-
-      body: JSON.stringify(id)})
+  async function getGmailIdAndRedirect(id: number) {
+    
+    console.log('getGmailIdAndRedirect called with id:', id);
+    await fetch(`http://localhost:3000/gmailId/${id}`)
     .then((res) => res.json())
+    .then((gmail_message_id) => {
+
+      window.location.href = `https://mail.google.com/mail/u/0/#all/${gmail_message_id}`;
+      
+    })
 
 
   }
@@ -102,6 +104,7 @@ function App() {
     setCompanyName('');
     setRoleTitle('')
     setNotes('')
+    setLink('')
     setIsHidden(true)
 
   }
@@ -113,6 +116,15 @@ function App() {
     .then((data) => setApplications(data))
 
   }, []);
+
+  function isValidUrl(link: string): boolean {
+  try {
+    const url = new URL(link);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
 
   function categorizeApps (status: string) {
 
@@ -126,51 +138,96 @@ function App() {
                 {editingId === filteredApp.id ? 
                 
                 <>
-                
-                  <input
-                  type='text'
-                  id='company_name' 
-                  value={editingDraft?. company_name ?? ''}
-                  onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
-                  />
 
-                  <input
-                  type='text'
-                  id='role_title' 
-                  value={editingDraft?. role_title ?? ''}
-                  onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
-                  />
+                  <div className='fixed z-20 w-2xl rounded-xl bg-slate-200 p-8 top-50 left-110'>
 
-                  <input
-                  type='text'
-                  id='notes' 
-                  value={editingDraft?. notes ?? ''}
-                  onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}  
-                  />
+                    <div className='grid grid-cols-2 pb-2 mb-4 items-center border-b-2 border-indigo-500'>
 
-                  <input 
-                  type="button" value="Cancel" 
-                  onClick={() => {
+                        <p className='col-start-1 text-2xl font-bold'>{filteredApp.role_title}</p>
+                        <p className='col-start-1 text-2xl'>{filteredApp.company_name}</p>
+                                    
+                        <div className='ml-auto col-start-2 row-start-1 row-span-2 items-center'>
+                        <input
+                          className='mr-2 text-xl px-4 py-2 bg-white rounded-xl cursor-pointer' 
+                          type="button" 
+                          value="Cancel" 
+                          onClick={() => {
 
-                    setEditingId(null);
+                            setEditingId(null);
 
-                    setEditingDraft(null);
+                            setEditingDraft(null);
 
-                  }}
-                  />
+                          }}
+                        />
 
-                  <input 
-                  type="button" value="Save" 
-                  onClick={() => {
+                        <input
+                          className='text-xl text-white py-2 bg-indigo-500 rounded-xl px-4 cursor-pointer' 
+                          type="button" 
+                          value="Save" 
+                          onClick={() => {
 
-                    if (editingId !== null) {
+                            if (editingId !== null) {
 
-                      saveEdit(editingId);
+                              saveEdit(editingId);
+                              
+                            }
+
+                          }}
+                        />
+                        </div>
+                    </div>  
+                    
+                    <div className='grid grid-cols-2'>
+                      <div className='col-start-1'>
+                      <label className='text-xs pb-2 mr-2 cursor-pointer' htmlFor="company_name">Company Name</label>
+                      <input
+                        type='text'
+                        id='company_name'
+                        className='flex mb-2 text-base rounded-xl p-2 border-2 border-slate-300 mr-2 w-full focus:border-indigo-500 focus:outline-none' 
+                        value={editingDraft?. company_name ?? ''}
+                        onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
+                      />
+                      </div>
                       
-                    }
+                      <div className='ml-4 col-start-2'>
+                      <label className='text-xs pb-2 mr-2 cursor-pointer' htmlFor="role_title">Role Title</label>
+                      <input
+                        type='text'                    
+                        className='flex mb-2 text-base rounded-xl p-2 border-2 border-slate-300 w-full focus:border-indigo-500 focus:outline-none'
+                        id='role_title' 
+                        value={editingDraft?. role_title ?? ''}
+                        onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
+                      />
+                      </div>
 
-                  }}
-                  />
+                      <div className='col-start-1 col-span-2'>
+                        <label htmlFor="link">Link</label>
+                        <input
+                        className='flex p-2 text-base border-2 border-slate-300 focus:outline-none focus:border-indigo-500 rounded-xl w-full' 
+                        type="text"
+                        id='link'
+                        value={editingDraft?. link ?? ''}
+                        onChange={(event) => setEditingDraft({...editingDraft!, link : event.target.value})}
+                         />
+                      </div>
+
+                    </div>
+
+                    <div className=''>
+                      <label className='cursor-pointer' htmlFor="notes">Details</label>
+                      <textarea 
+                      onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}   
+                      id='notes' 
+                      className='flex resize-none self-start w-full h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>
+                                                           
+                        {editingDraft?. notes ?? ''}
+                          
+                      </textarea>
+                    </div>
+
+                  </div>
+                
+                  
                 
 
                 </>
@@ -180,54 +237,79 @@ function App() {
                 <>
                 <div className='grid grid-cols-3 rounded-xl p-2 mb-4 bg-white gap-2 w-64'>                    
                   <div className='col-start-1 col-span-2'>{filteredApp.company_name}</div>
-                  <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' onClick={() => setCheckingId(filteredApp.id)}/></div>
-                  <div className='col-start-1 col-span-2 text-lg font-bold'>{filteredApp.role_title}</div> 
-                  {/* <select name="statuses" id="statuses" value={filteredApp.status}
-                  onChange={(event) => {
-
-                    updateStatus(filteredApp.id, event.target.value);
-
-                  }}>
-                  <option value='applied'>applied</option>
-                  <option value='interview'>interview</option>
-                  <option value='offer'>offer</option>
-                  <option value='rejected'>rejected</option>
-                  </select> - 
-                  {filteredApp.notes} -  */}
+                  <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' onClick={() => {console.log('Info clicked, id:', filteredApp.id); setCheckingId(filteredApp.id);}}/></div>
+                  <div className='col-start-1 col-span-2 text-lg font-bold'>{filteredApp.role_title}</div>                                        
                   <div className='col-start-1 col-span-2 text-slate-500 text-xs'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
                   <div className='col-start-1 col-span-2 text-xs text-slate-500 items-center'>
-                  <button className='mr-2 bg-slate-200 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
+                    <button className='mr-2 bg-slate-200 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
+                      
+                      const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
+                      
+                      if (deleteConfirmed) {
+
+                        deleteApplication(filteredApp.id);
+
+                      }
+
+                      }}>Delete</button>
+
+                    <button className='bg-slate-200 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
+
+                      setEditingId(filteredApp.id);
+
+                      setEditingDraft({...filteredApp});
+
+                    }}>Edit</button>
                     
-                    const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
-                    
-                    if (deleteConfirmed) {
-
-                      deleteApplication(filteredApp.id);
-
-                    }
-
-                    }}>Delete</button>
-
-                  <button className='bg-slate-200 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
-
-                    setEditingId(filteredApp.id);
-
-                    setEditingDraft({...filteredApp});
-
-                  }}>Edit</button>
-
                   </div>
+
+                  <select 
+                  className='mr-auto col-start-3 text-sm text-slate-500 focus:outline-none w-full cursor-pointer'
+                  id="statuses" 
+                  value={filteredApp.status}
+                    onChange={(event) => {
+
+                      updateStatus(filteredApp.id, event.target.value);
+
+                    }}>
+                    <option value='applied'>applied</option>
+                    <option value='interview'>interview</option>
+                    <option value='offer'>offer</option>
+                    <option value='rejected'>rejected</option>
+                  </select>
 
                 </div>
 
-                <div className={`fixed z-20 w-2xl rounded-xl bg-slate-200 p-2 top-50 left-110 transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'opacity-100 visible ' : 'opacity-0 invisible'}`}>
+                <div className={`fixed z-20 w-2xl rounded-xl bg-slate-200 p-2 top-50 left-110 transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
                   <div className='flex'>                                        
                     <button className='ml-auto mr-2 text-slate-500 cursor-pointer' onClick={() => setCheckingId(null)}>✕</button>
                   </div>
                   <div className='flex mb-2 text-4xl items-center'>
                     <p className='mr-4'>{filteredApp.role_title}</p>
-                    {status =='applied' && <Link className='mt-auto mb-1 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500'/>}
-                    {status !== 'applied' && <Mail className='mt-auto mb-1 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500'/>} 
+                    {status =='applied' 
+                      && 
+                    <Link className='mt-auto mb-1 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500 group'
+                    onClick={() => {
+
+                      if (isValidUrl(filteredApp.link) === true) {
+
+                        window.location.href = filteredApp.link
+
+                      } else if (filteredApp.link === 'No link provided.') {
+
+                        alert('No link provided.')
+
+                      } else {
+                        
+                        alert('Not a valid link.')
+
+                      }
+
+                    }}
+                    
+                    />}
+                    
+                    {status !== 'applied' && <Mail onClick={() => getGmailIdAndRedirect(filteredApp.id)} className='mt-auto mb-1 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500'/>} 
                   </div>
                   <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2'>
                     <p className='text-2xl'>{filteredApp.company_name}</p>
@@ -312,6 +394,7 @@ function App() {
 
         company_name : editingDraft?.company_name,
         role_title : editingDraft?.role_title,
+        link : editingDraft?.link,
         notes: editingDraft?.notes
 
       })
@@ -354,10 +437,10 @@ function App() {
       <button className='m-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2' onClick={() => setIsHidden(false)}><Plus/> <p>New Job</p></button>
 
       {/* button for returning to top */}
-      <button className={`fixed left-10 bottom-10 cursor-pointer rounded-xl text-white bg-indigo-500 p-2 transition-[opacity,visibility] duration-300 ${showButton? 'opacity-100 visible': 'opacity-0 invisible'}`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp/></button>
+      <button className={`fixed left-10 bottom-10 cursor-pointer rounded-xl text-white bg-indigo-500 p-2 transition-[opacity,visibility] duration-300 ${showButton? 'opacity-100 visible pointer-events-auto': 'opacity-0 invisible pointer-events-none'}`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp/></button>
 
       {/* Overlay a blackened screen when add application window is open */}
-      <div className={`fixed z-4 top-0 left-0 h-1000 w-1000 bg-black/75 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible' : 'opacity-100 visible'}`}></div>
+      <div className={`fixed z-4 top-0 left-0 h-1000 w-1000 bg-black/75 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible pointer-events-auto'}`}></div>
 
       {/* side panel */}
       <aside className={`fixed top-0 right-0 z-10 h-full w-10% bg-indigo-500 transition-transform duration-300 ease-out p-4 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
@@ -397,7 +480,7 @@ function App() {
       </div>
 
       {/* application */}
-      <div className={`fixed z-20 w-6xl rounded-xl bg-slate-200 top-50 left-50 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible': 'opacity-100 visible'}`}>
+      <div className={`fixed z-20 w-6xl rounded-xl bg-slate-200 top-50 left-50 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none': 'opacity-100 visible pointer-events-auto'}`}>
 
           <form className='grid grid-cols-2 p-4 gap-x-4' onSubmit={ async (event) => {
 
@@ -414,6 +497,7 @@ function App() {
 
                 companyName,
                 roleTitle,
+                link,
                 notes
 
               })
@@ -432,6 +516,7 @@ function App() {
               <label className='text-slate-500' htmlFor='role_title'>Role Title</label>
             
               <input className='rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none p-2'
+              required
               autoComplete='off'
               type='text' 
               name='company_name' 
@@ -439,7 +524,8 @@ function App() {
               value={companyName}
               onChange={(event) => setCompanyName(event.target.value)}
               />
-              <input className='rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none p-2'
+              <input className='rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none p-2'              
+              required
               type='text' 
               name='role_title' 
               id='role_title'
@@ -447,23 +533,34 @@ function App() {
               onChange={(event) => setRoleTitle(event.target.value)}
               />
 
-            <label className='col-span-2 mt-4 text-slate-500' htmlFor='notes'>Notes(Optional)</label>
-            <textarea
-            autoComplete='off'
-            className='resize-none col-span-2 rounded-xl border-2 border-slate-300 mb-4 focus:border-indigo-500 focus:outline-none p-2' 
-            name='notes'
-            id='notes'
-            value={notes ?? ''}
-            onChange={(event) => setNotes(event.target.value)}> 
-            </textarea>
+              <label className='mt-4 text-slate-500' htmlFor="link">Link</label>
+              <input
+              required
+              autoComplete='off'
+              className='col-span-2 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none p-2' 
+              type="text" 
+              id='link'
+              value={link}
+              onChange={(event) => setLink(event.target.value)}
+              />
 
-            <input className='cursor-pointer rounded-full bg-slate-300 p-2 col-span-2' type='button' value='Cancel' onClick={() => {            
-              const userConfirmed = confirm('Are you sure you want to cancel? Your input will be lost.');            
-              if (userConfirmed) {
-                resetForm()
-            }}}/>
+              <label className='col-span-2 mt-4 text-slate-500' htmlFor='notes'>Details(Optional)</label>
+              <textarea
+              autoComplete='off'
+              className='resize-none col-span-2 rounded-xl border-2 border-slate-300 mb-4 focus:border-indigo-500 focus:outline-none p-2' 
+              name='notes'
+              id='notes'
+              value={notes ?? ''}
+              onChange={(event) => setNotes(event.target.value)}> 
+              </textarea>
 
-            <input className='border rounded-full p-2 bg-indigo-500 text-white col-span-2 cursor-pointer' type='submit' value='Submit'/>
+              <input className='cursor-pointer rounded-full bg-slate-300 p-2 col-span-2' type='button' value='Cancel' onClick={() => {            
+                const userConfirmed = confirm('Are you sure you want to cancel? Your input will be lost.');            
+                if (userConfirmed) {
+                  resetForm()
+              }}}/>
+
+              <input className='border rounded-full p-2 bg-indigo-500 text-white col-span-2 cursor-pointer' type='submit' value='Submit'/>
             
           </form>          
 

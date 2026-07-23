@@ -30,6 +30,7 @@ interface UpdatableApplicationFields {
   company_name: string,
   role_title: string,
   status: 'applied' | 'interview' | 'offer' | 'rejected',
+  link: string,
   notes?: string
 
 }
@@ -53,6 +54,15 @@ function buildUpdateQuery (id: string, body: Partial<UpdatableApplicationFields>
 
         if (body.role_title == '') values.push('Unknown Role')
         else values.push(body.role_title); 
+
+    }
+
+    if ('link' in body) {
+
+        fields.push('link = $' + (values.length + 1));
+
+        if (body.link == '') values.push('No link provided.')
+        else values.push(body.link)
 
     }
 
@@ -107,12 +117,12 @@ app.get('/applications', async (req, res) => {
 
 app.post('/applications', async (req, res) => {
 
-    const {companyName, roleTitle, notes} = req.body;
+    const {companyName, roleTitle, link, notes} = req.body;
 
     const result = await pool.query(
 
-        'INSERT INTO applications(company_name, role_title, notes) VALUES ($1, $2, $3) RETURNING *',
-        [companyName==''? 'Unknown Company': companyName, roleTitle==''? 'Unknown Role': roleTitle, notes==''?  'No notes provided': notes]
+        'INSERT INTO applications(company_name, role_title, link, notes) VALUES ($1, $2, $3, $4) RETURNING *',
+        [companyName==''? 'Unknown Company': companyName, roleTitle==''? 'Unknown Role': roleTitle, link==''? 'No link provided': link, notes==''?  'No notes provided': notes]
 
     );
 
@@ -205,11 +215,13 @@ app.get('/auth/google/callback', async (req, res) => {
 
 });
 
-app.get('/gmaiId', async (req, res) => {
+app.get('/gmailId/:id', async (req, res) => {
 
-    await pool.query('')
-
-
+    console.log('Received id:', req.params.id, '→ parsed:', parseInt(req.params.id));
+    const primary_key = parseInt(req.params.id);
+    const result = await pool.query('SELECT gmail_message_id FROM applications WHERE id = $1', [primary_key]);
+    console.log('Result:', result.rows[0]);
+    res.json(result.rows[0]?.gmail_message_id);
 
 })
 
@@ -235,7 +247,7 @@ app.get('/sync', async (req, res) => {
     const response = await gmail.users.messages.list({
 
         userId: 'me',
-        q: 'subject:("Thank you for applying" OR interview OR "Your application" OR offer)after:2026/01/01 category:primary',
+        q: 'subject:("Thank you for applying" OR interview OR "Your application" OR offer) after:2026/01/01 category:primary',
         maxResults: 50
 
     });
@@ -283,16 +295,17 @@ app.get('/sync', async (req, res) => {
             ...email,
             status: classifyEmail(email.subject),
             company_name: email.from.split('<')[0]?.trim() ?? 'Unknown Company',
+            link: 'No link provided.',
                         
         }))
         .filter((email) => email.status !== 'other') // filter out emails with status value 'other'
         .map(async (email) => { // wait for each new shaped object to be done being inserted in the applications table
 
             await pool.query(`
-                    INSERT INTO applications(company_name, status, applied_date, notes, gmail_message_id) 
-                    VALUES ($1, $2, $3, $4, $5)
+                    INSERT INTO applications(company_name, status, applied_date, notes, gmail_message_id, link) 
+                    VALUES ($1, $2, $3, $4, $5, $6)
                     ON CONFLICT (gmail_message_id) DO NOTHING`, 
-                    [email.company_name, email.status, email.date? new Date(email.date): new Date(), email.snippet, email.id]
+                    [email.company_name, email.status, email.date? new Date(email.date): new Date(), email.snippet, email.id, email.link]
                 );
 
 
@@ -302,6 +315,8 @@ app.get('/sync', async (req, res) => {
 
 
     )
+
+    console.log('Messages found:', messages?.length);
 
     res.json({message: 'Sync complete!'});
 
