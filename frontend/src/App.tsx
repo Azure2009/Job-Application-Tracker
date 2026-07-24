@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {  Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Table2, Plus, Columns2, TextAlignJustify, Info } from 'lucide-react'
+import {   SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Table2, Plus, Columns2, TextAlignJustify, Info, FileUser } from 'lucide-react'
 
 interface Application {
 
@@ -12,6 +12,8 @@ interface Application {
   notes?: string
 
 }
+
+type ViewType = 'column' | 'list' | 'table'
 
 function daysSinceApplied(d: string): number {
 
@@ -51,6 +53,9 @@ function App() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [showButton, setShowButton] = useState<boolean>(false);
+
+  const [view, setView] = useState<ViewType>('column');
+  
 
   // Show Button when scrolled too far down.
   useEffect(() => {
@@ -126,7 +131,7 @@ function App() {
   }
 }
 
-  function categorizeApps (status: string) {
+  function categorizeApps_column (status: string) {
 
     return (
 
@@ -235,7 +240,8 @@ function App() {
                 : 
                 
                 <>
-                <div className='grid grid-cols-3 rounded-xl p-2 mb-4 bg-white gap-2 w-64'>                    
+                
+                <div className={`grid grid-cols-3 rounded-xl p-2 mb-4 bg-white gap-2 w-64 transition-[opacity,visibility] duration-200`}>                    
                   <div className='col-start-1 col-span-2'>{filteredApp.company_name}</div>
                   <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' onClick={() => {console.log('Info clicked, id:', filteredApp.id); setCheckingId(filteredApp.id);}}/></div>
                   <div className='col-start-1 col-span-2 text-lg font-bold'>{filteredApp.role_title}</div>                                        
@@ -264,8 +270,7 @@ function App() {
                   </div>
 
                   <select 
-                  className='mr-auto col-start-3 text-sm text-slate-500 focus:outline-none w-full cursor-pointer'
-                  id="statuses" 
+                  className='mr-auto col-start-3 text-sm text-slate-500 focus:outline-none w-full cursor-pointer'                   
                   value={filteredApp.status}
                     onChange={(event) => {
 
@@ -338,6 +343,180 @@ function App() {
   )
 
   }
+
+  function categorizeApps_list (status: string) {
+
+    return (
+
+      applications.filter((app) => app.status === status)
+      .map((filteredApp) => (
+
+        <li key={filteredApp.id}>
+          {editingId === filteredApp.id? 
+          
+            <div className='fixed z-20 w-2xl rounded-xl bg-slate-200 p-8 top-50 left-110'>
+
+                    <div className='grid grid-cols-2 pb-2 mb-4 items-center border-b-2 border-indigo-500'>
+
+                        <p className='col-start-1 text-2xl font-bold'>{filteredApp.role_title}</p>
+                        <p className='col-start-1 text-2xl'>{filteredApp.company_name}</p>
+                                    
+                        <div className='ml-auto col-start-2 row-start-1 row-span-2 items-center'>
+                        <input
+                          className='mr-2 text-xl px-4 py-2 bg-white rounded-xl cursor-pointer' 
+                          type="button" 
+                          value="Cancel" 
+                          onClick={() => {
+
+                            setEditingId(null);
+
+                            setEditingDraft(null);
+
+                          }}
+                        />
+
+                        <input
+                          className='text-xl text-white py-2 bg-indigo-500 rounded-xl px-4 cursor-pointer' 
+                          type="button" 
+                          value="Save" 
+                          onClick={() => {
+
+                            if (editingId !== null) {
+
+                              saveEdit(editingId);
+                              
+                            }
+
+                          }}
+                        />
+                        </div>
+                    </div>  
+                    
+                    <div className='grid grid-cols-2'>
+                      <div className='col-start-1'>
+                      <label className='text-xs pb-2 mr-2 cursor-pointer' htmlFor="company_name">Company Name</label>
+                      <input
+                        type='text'
+                        id='company_name'
+                        className='flex mb-2 text-base rounded-xl p-2 border-2 border-slate-300 mr-2 w-full focus:border-indigo-500 focus:outline-none' 
+                        value={editingDraft?. company_name ?? ''}
+                        onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
+                      />
+                      </div>
+                      
+                      <div className='ml-4 col-start-2'>
+                      <label className='text-xs pb-2 mr-2 cursor-pointer' htmlFor="role_title">Role Title</label>
+                      <input
+                        type='text'                    
+                        className='flex mb-2 text-base rounded-xl p-2 border-2 border-slate-300 w-full focus:border-indigo-500 focus:outline-none'
+                        id='role_title' 
+                        value={editingDraft?. role_title ?? ''}
+                        onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
+                      />
+                      </div>
+
+                      <div className='col-start-1 col-span-2'>
+                        <label htmlFor="link">Link</label>
+                        <input
+                        className='flex p-2 text-base border-2 border-slate-300 focus:outline-none focus:border-indigo-500 rounded-xl w-full' 
+                        type="text"
+                        id='link'
+                        value={editingDraft?. link ?? ''}
+                        onChange={(event) => setEditingDraft({...editingDraft!, link : event.target.value})}
+                         />
+                      </div>
+
+                    </div>
+
+                    <div className=''>
+                      <label className='cursor-pointer' htmlFor="notes">Details</label>
+                      <textarea 
+                      onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}   
+                      id='notes' 
+                      className='flex resize-none self-start w-full h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>
+                                                           
+                        {editingDraft?. notes ?? ''}
+                          
+                      </textarea>
+                    </div>
+
+                  </div> 
+            
+            : 
+            
+            <>
+              
+              <div className='bg-white grid grid-col-4  items-center px-4 py-2 rounded-xl'>
+              
+                <div className='col-start-1'>
+                  <p className='text-2xl'>{filteredApp.company_name}</p>
+                </div>
+
+                <div className='col-start-1'>
+                  <p className='text-slate-500'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</p>
+                </div>
+
+                <div className='col-start-2 row-start-1 row-end-2'>
+                  <p >{filteredApp.role_title}</p>              
+                </div>
+
+
+                <div className='col-start-3 row-start-1 row-end-2'>
+                  <select className='focus:outline-none cursor-pointer' value={filteredApp.status} onChange={(event) => updateStatus(filteredApp.id, event.target.value)}>
+
+                  <option value="applied">Applied</option>
+                  <option value="interview">Interview</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="offer">Offer</option>
+                </select>
+                </div>
+
+                <div className='flex col-start-4 row-start-1 row-end-2 items-center'>
+
+                  <button className='ml-auto mr-2 bg-red-500 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
+                      
+                      const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
+                      
+                      if (deleteConfirmed) {
+
+                        deleteApplication(filteredApp.id);
+
+                      }
+
+                      }}><Trash2/></button>
+
+                    <button className='ml-4 bg-slate-200 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
+
+                      setEditingId(filteredApp.id);
+
+                      setEditingDraft({...filteredApp});
+
+                    }}><SquarePen/></button>
+
+                </div>
+                      
+              </div>
+              
+            </>
+          
+          }
+
+        </li>
+
+
+
+
+      ))
+
+
+
+    )
+
+
+
+  }
+
+  function categorizeApps_table (status: string) {}
 
   async function deleteApplication (id: number) {
 
@@ -449,15 +628,15 @@ function App() {
         </div>
         <div className='grid relative h-1/3 text-5xl text-white p-2'>
           <div className='relative self-center group'>
-            <button className='flex items-center cursor-pointer'><Columns2/></button>
+            <button onClick={() => setView('column')} className='flex items-center cursor-pointer'><Columns2/></button>
             <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-14 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Column</div>
           </div>
           <div className='relative self-center group'>
-            <button className='flex items-center cursor-pointer'><List/></button>
+            <button onClick={() => setView('list')} className='flex items-center cursor-pointer'><List/></button>
             <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-14 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>List</div>
           </div>
           <div className='relative self-center group'>
-            <button className='flex items-center cursor-pointer'><Table2/></button>
+            <button onClick={() => setView('table')} className='flex items-center cursor-pointer'><Table2/></button>
             <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-14 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Table</div>
           </div>
         </div>
@@ -468,18 +647,44 @@ function App() {
       </aside>
 
 
-      {/* the 4 categories */}
-      <div className='grid grid-cols-4 ml-32 mr-24 gap-4'>
+      {/* 3 views with 4 categories */}
 
-        <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Applied</p><ul>{categorizeApps('applied')}</ul></div>
-        <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Interview</p><ul>{categorizeApps('interview')}</ul></div>
-        <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Rejected</p><ul>{categorizeApps('rejected')}</ul></div>
-        <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Offered</p><ul>{categorizeApps('offer')}</ul></div>
+        {/* Column style */}
+        {view == 'column' && <div className='grid grid-cols-4 ml-32 mr-24 gap-4'>
 
+          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Applied</p><ul>{categorizeApps_column('applied')}</ul></div>
+          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Interview</p><ul>{categorizeApps_column('interview')}</ul></div>
+          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Rejected</p><ul>{categorizeApps_column('rejected')}</ul></div>
+          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Offered</p><ul>{categorizeApps_column('offer')}</ul></div>
 
-      </div>
+        </div>}
 
-      {/* application */}
+        {/* list style */}
+        {view == 'list' && <div className=''>
+          
+            <div className='p-4 ml-32 mr-24 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl'>
+              <p className='flex text-3xl items-center text-indigo-500'>Applied <FileUser className='ml-2'/></p>              
+              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('applied')}</ul>
+            </div>
+
+            {/* <div className='bg-slate-100'>
+              <p>Interview</p>
+              <ul>{categorizeApps_list('interview')}</ul>
+            </div>
+
+            <div className='bg-slate-100'>
+              <p>Rejected</p>
+              <ul>{categorizeApps_list('rejected')}</ul>
+            </div>
+          
+            <div className='bg-slate-100'>
+              <p>Offered</p>
+              <ul>{categorizeApps_list('offer')}</ul>
+            </div> */}
+          
+        </div>}
+
+      {/* new application */}
       <div className={`fixed z-20 w-6xl rounded-xl bg-slate-200 top-50 left-50 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none': 'opacity-100 visible pointer-events-auto'}`}>
 
           <form className='grid grid-cols-2 p-4 gap-x-4' onSubmit={ async (event) => {
@@ -511,8 +716,7 @@ function App() {
             
             
               <label className='text-slate-500' htmlFor='company_name'>Company Name</label>
-            
-            
+                        
               <label className='text-slate-500' htmlFor='role_title'>Role Title</label>
             
               <input className='rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none p-2'
