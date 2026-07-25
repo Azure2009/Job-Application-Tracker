@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {   SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Table2, Plus, Columns2, TextAlignJustify, Info, FileUser } from 'lucide-react'
+import {  MessageSquareCheck, UserRoundX, MessagesSquare, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser } from 'lucide-react'
 
 interface Application {
 
@@ -13,7 +13,9 @@ interface Application {
 
 }
 
-type ViewType = 'column' | 'list' | 'table'
+// For toggling between column and list view
+
+type ViewType = 'column' | 'list'
 
 function daysSinceApplied(d: string): number {
 
@@ -55,8 +57,9 @@ function App() {
   const [showButton, setShowButton] = useState<boolean>(false);
 
   const [view, setView] = useState<ViewType>('column');
-  
 
+  const [gmailProfile, setGmailProfile] = useState<{ user_account: string, profile_picture: string} | null>(null);
+  
   // Show Button when scrolled too far down.
   useEffect(() => {
 
@@ -69,7 +72,20 @@ function App() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
 
-  }, [])
+  }, []);
+
+  // Show gmail profile picture 
+
+  useEffect(() => {
+
+    fetch('http://localhost:3000/gmail-profile')
+    .then((res) => res.json())
+    .then((data) => setGmailProfile(data))
+    console.log('Profile:', gmailProfile)
+
+  }, []);
+
+  // Sync with gmail
 
   async function sync() {
 
@@ -104,15 +120,7 @@ function App() {
     
   }
 
-  function resetForm() {
-
-    setCompanyName('');
-    setRoleTitle('')
-    setNotes('')
-    setLink('')
-    setIsHidden(true)
-
-  }
+  // SHoe applications upon render
 
   useEffect(() => {
 
@@ -446,22 +454,80 @@ function App() {
             
             <>
               
-              <div className='bg-white grid grid-col-4  items-center px-4 py-2 rounded-xl'>
+              <div className='bg-white grid grid-cols-5 gap-4 items-center px-4 py-2 rounded-xl'>
               
                 <div className='col-start-1'>
-                  <p className='text-2xl'>{filteredApp.company_name}</p>
+                  <p className='text-2xl truncate'>{filteredApp.company_name}</p>
                 </div>
 
                 <div className='col-start-1'>
                   <p className='text-slate-500'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</p>
                 </div>
 
-                <div className='col-start-2 row-start-1 row-end-2'>
-                  <p >{filteredApp.role_title}</p>              
+                <div className='flex col-start-2 row-start-1 gap-x-2 items-center justify-center'>
+                  {status !== 'applied' && <div className='relative self-center group'>
+                    <Mail className='hover:text-indigo-500' onClick={() => getGmailIdAndRedirect(filteredApp.id)}/>
+                    <div className='p-2 absolute -translate-y-1/2 bottom-1/2 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:text-white visible transition-opacity duration-200 pointer-events-none'>Email</div>
+                  </div>}
+                                    
+                  {status === 'applied' && <div className='relative self-center group'>
+                    <Link className='hover:text-indigo-500' 
+                    onClick={() => {
+
+                      if (isValidUrl(filteredApp.link) === true) {
+
+                        window.location.href = filteredApp.link
+
+                      } else if (filteredApp.link === 'No link provided.') {
+
+                        alert('No link provided.')
+
+                      } else {
+                        
+                        alert('Not a valid link.')
+
+                      }
+
+                    }}
+                    />
+                    <div className='p-2 absolute -translate-y-1/2 bottom-1/2 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:text-white visible transition-opacity duration-200 pointer-events-none'>Link</div>
+                  </div>}
+
+                  <div className='relative self-center group'>
+                    <ReceiptText className='hover:text-indigo-500' onClick={() => setCheckingId(filteredApp.id)}/>
+                    <div className='p-2 absolute -translate-y-1/2 bottom-1/2 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:text-white visible transition-opacity duration-200 pointer-events-none'>Notes</div>
+                  </div>
+
+                </div>
+
+                <div className={`fixed z-20 w-2xl rounded-xl bg-slate-200 p-2 top-50 left-110 transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                  <div className='flex'>                                        
+                    <button className='ml-auto mr-2 text-slate-500 cursor-pointer' onClick={() => setCheckingId(null)}>✕</button>
+                  </div>
+                  <div className='flex mb-2 text-4xl items-center'>
+                    <p className='mr-4'>{filteredApp.role_title}</p>                                                            
+                  </div>
+                  <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2'>
+                    <p className='text-2xl'>{filteredApp.company_name}</p>
+                    <p className='ml-auto text-slate-500'>Status: {status}</p>
+                  </div>
+                  <div className='flex mt-2 mb-2 items-center'>
+                    <ReceiptText className='text-indigo-500'/>
+                    <p className='text-xl'>Details</p>
+                  </div>
+                  <div className='flex p-2 indent-6'>
+                    {filteredApp.notes}
+                  </div>                              
                 </div>
 
 
+
+
                 <div className='col-start-3 row-start-1 row-end-2'>
+                  <p >{filteredApp.role_title}</p>              
+                </div>
+                
+                <div className='col-start-4 row-start-1 row-end-2'>
                   <select className='focus:outline-none cursor-pointer' value={filteredApp.status} onChange={(event) => updateStatus(filteredApp.id, event.target.value)}>
 
                   <option value="applied">Applied</option>
@@ -471,7 +537,7 @@ function App() {
                 </select>
                 </div>
 
-                <div className='flex col-start-4 row-start-1 row-end-2 items-center'>
+                <div className='flex col-start-5 row-start-1 row-end-2 items-center'>
 
                   <button className='ml-auto mr-2 bg-red-500 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
                       
@@ -485,7 +551,7 @@ function App() {
 
                       }}><Trash2/></button>
 
-                    <button className='ml-4 bg-slate-200 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
+                    <button className='ml-4 bg-indigo-500 cursor-pointer p-2 z-10 rounded-xl ' onClick={() => {
 
                       setEditingId(filteredApp.id);
 
@@ -516,7 +582,13 @@ function App() {
 
   }
 
-  function categorizeApps_table (status: string) {}
+  function resetForm () {
+
+    setEditingDraft(null);
+    setEditingId(null);
+    setIsHidden(true);
+
+  }
 
   async function deleteApplication (id: number) {
 
@@ -599,12 +671,23 @@ function App() {
     <>
       {/* header */}
       <div className='flex relative items-center justify-between p-4'>
-        <p className="text-3xl">Job Application Tracker</p>
-        <button className='absolute flex items-center left-300 cursor-pointer text-slate-700 p-2 rounded-full text-lg justify-center text-slate-500 border-none hover:text-indigo-500 transition-text duration-300' onClick={() => connectGmail()}>Connect gmail</button>
+        <p className="text-3xl">Job Application Tracker</p>                
         <div className='relative'>
         <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2'/>
-        <input type="text" className='rounded-full shadow-lg p-2 pl-10 inline-lg outline-none text-slate-500' placeholder='Search'/>
+        <input type="text" className='rounded-full shadow-lg p-2 pl-10 inline-lg outline-none text-slate-500' placeholder='Search'/>        
         </div>
+        {gmailProfile ? (
+          <img 
+            src={gmailProfile.profile_picture} 
+            alt={gmailProfile.user_account}
+            title={gmailProfile.user_account}
+            className='w-10 h-10 rounded-full absolute flex items-center left-296 cursor-pointer'
+          />
+          ) 
+          : 
+          (
+            <button className='absolute flex items-center left-300 cursor-pointer text-slate-700 p-2 rounded-full text-lg justify-center text-slate-500 border-none hover:text-indigo-500 transition-text duration-300' onClick={() => connectGmail()}>Connect gmail</button>
+          )}
 
         {/* Side panel button */}
         <button className='cursor-pointer text-slate-500' onClick={() => setIsOpen(true)}>
@@ -622,28 +705,28 @@ function App() {
       <div className={`fixed z-4 top-0 left-0 h-1000 w-1000 bg-black/75 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible pointer-events-auto'}`}></div>
 
       {/* side panel */}
-      <aside className={`fixed top-0 right-0 z-10 h-full w-10% bg-indigo-500 transition-transform duration-300 ease-out p-4 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className='p-2 flex h-10 relative items-center text-xl self-center text-slate-400'>
-          <button className='absolute left-3 cursor-pointer' onClick={() => setIsOpen(false)}>✕</button>
+      <aside className={`fixed top-0 right-0 z-10 h-full w-10% bg-indigo-500 transition-transform duration-300 ease-out p-2 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
+
+        <div className='p-2 flex h-10 relative items-center text-xl justify-center text-slate-400'>
+          <button className='relative cursor-pointer hover:text-slate-300 transition-colors duration-200' onClick={() => setIsOpen(false)}>✕</button>
         </div>
-        <div className='grid relative h-1/3 text-5xl text-white p-2'>
+
+        <div className='grid relative top-20 text-5xl text-white p-2 justify-center'>
           <div className='relative self-center group'>
-            <button onClick={() => setView('column')} className='flex items-center cursor-pointer'><Columns2/></button>
-            <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-14 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Column</div>
+            <button onClick={() => setView('column')} className='flex items-center cursor-pointer hover:bg-indigo-600 transition-colors duration-200  rounded-xl p-2'><Columns2/></button>
+            <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-16 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Column</div>
           </div>
-          <div className='relative self-center group'>
-            <button onClick={() => setView('list')} className='flex items-center cursor-pointer'><List/></button>
-            <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-14 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>List</div>
-          </div>
-          <div className='relative self-center group'>
-            <button onClick={() => setView('table')} className='flex items-center cursor-pointer'><Table2/></button>
-            <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-14 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Table</div>
-          </div>
+          <div className='mt-10 relative self-center group'>
+            <button onClick={() => setView('list')} className='flex items-center cursor-pointer hover:bg-indigo-600 transition-colors duration-200 rounded-xl p-2'><List/></button>
+            <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-16 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>List</div>
+          </div>                    
         </div>
-        <div className='m-2 flex relative top-96 group'>
-          <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-14 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Sync</div>
-          <button className={`text-white cursor-pointer ${isSyncing? 'animate-spin [animation-direction:reverse]':''}`} onClick={() => sync()}><RotateCcw/></button>          
-          </div>
+
+        <div className='m-2 p-2 relative grid top-120 group bg-indigo-600 rounded-xl hover:bg-indigo-400 cursor-pointer' onClick={() => sync()}>                    
+            <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Sync</div>
+            <button className={`text-white cursor-pointer ${isSyncing? 'animate-spin [animation-direction:reverse]':''}`}><RotateCcw/></button>          
+        </div>
+        
       </aside>
 
 
@@ -660,27 +743,27 @@ function App() {
         </div>}
 
         {/* list style */}
-        {view == 'list' && <div className=''>
+        {view == 'list' && <div className='grid gap-y-4'>
           
             <div className='p-4 ml-32 mr-24 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl'>
               <p className='flex text-3xl items-center text-indigo-500'>Applied <FileUser className='ml-2'/></p>              
               <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('applied')}</ul>
             </div>
 
-            {/* <div className='bg-slate-100'>
-              <p>Interview</p>
-              <ul>{categorizeApps_list('interview')}</ul>
+            <div className='p-4 ml-32 mr-24 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl'>
+              <p className='flex text-3xl items-center text-indigo-500'>Interview <MessagesSquare className='ml-2'/></p>
+              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('interview')}</ul>
             </div>
 
-            <div className='bg-slate-100'>
-              <p>Rejected</p>
-              <ul>{categorizeApps_list('rejected')}</ul>
+            <div className='p-4 ml-32 mr-24 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl'>
+              <p className='flex text-3xl items-center text-indigo-500'>Rejected <UserRoundX className='ml-2'/></p>
+              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('rejected')}</ul>
             </div>
           
-            <div className='bg-slate-100'>
-              <p>Offered</p>
-              <ul>{categorizeApps_list('offer')}</ul>
-            </div> */}
+            <div className='p-4 ml-32 mr-24 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl'>
+              <p className='flex text-3xl items-center text-indigo-500'>Offered <MessageSquareCheck className='ml-2'/></p>
+              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('offer')}</ul>
+            </div>
           
         </div>}
 

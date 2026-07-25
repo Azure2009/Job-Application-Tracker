@@ -158,7 +158,8 @@ app.get('/auth/google', async (req, res) => {
         scope: [
         'https://www.googleapis.com/auth/gmail.readonly',
         'openid',
-        'email'
+        'email',
+        'profile'
         ],
         prompt: 'consent'
     
@@ -168,6 +169,12 @@ app.get('/auth/google', async (req, res) => {
 
 
 });
+
+app.get('/gmail-profile', async (req, res) => {
+
+    const result = await pool.query('SELECT user_account, profile_picture FROM gmail_tokens LIMIT 1');    
+    res.json(result.rows[0] ?? null);
+})
 
 app.get('/auth/google/callback', async (req, res) => {
 
@@ -198,7 +205,10 @@ app.get('/auth/google/callback', async (req, res) => {
 
     });
 
-    const email = ticket.getPayload()?.email;
+    const payload = ticket.getPayload();
+    
+    const email = payload?.email;
+    const picture = payload?.picture;
 
     if (!email) {
 
@@ -207,8 +217,8 @@ app.get('/auth/google/callback', async (req, res) => {
 
     }
 
-    await pool.query('INSERT INTO gmail_tokens (user_account, refresh_token) VALUES ($1, $2) ON CONFLICT (user_account) DO UPDATE SET refresh_token = EXCLUDED.refresh_token', 
-        [email, tokens.refresh_token]
+    await pool.query('INSERT INTO gmail_tokens (user_account, refresh_token, profile_picture) VALUES ($1, $2, $3) ON CONFLICT (user_account) DO UPDATE SET refresh_token = EXCLUDED.refresh_token, profile_picture = EXCLUDED.profile_picture', 
+        [email, tokens.refresh_token, picture]
     );
 
     res.redirect('http://localhost:5173/');
