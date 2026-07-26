@@ -332,6 +332,25 @@ app.get('/sync', async (req, res) => {
 
 });
 
+app.get('/logout', async (req, res) => {
+
+    const result = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
+
+    const refresh_token = result.rows[0].refresh_token;
+
+    if (refresh_token) {
+
+        await oauth2Client.revokeToken(refresh_token);
+
+    }
+
+    await pool.query('DELETE FROM gmail_tokens');
+
+    res.json({message: 'logged out successfully.'});
+
+
+})
+
 app.listen(PORT, () => {
 
     console.log(`Server running on http://localhost:${PORT}`);

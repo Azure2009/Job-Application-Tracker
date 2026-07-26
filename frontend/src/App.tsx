@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {  MessageSquareCheck, UserRoundX, MessagesSquare, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser } from 'lucide-react'
+import { LogOut, MessageSquareCheck, UserRoundX, MessagesSquare, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser } from 'lucide-react'
 
 interface Application {
 
@@ -59,6 +59,8 @@ function App() {
   const [view, setView] = useState<ViewType>('column');
 
   const [gmailProfile, setGmailProfile] = useState<{ user_account: string, profile_picture: string} | null>(null);
+
+  const [searchTerm, setSearchTerm] = useState<string>('')
   
   // Show Button when scrolled too far down.
   useEffect(() => {
@@ -97,6 +99,21 @@ function App() {
     setApplications(apps);
     setIsSyncing(false);
   })
+
+  }
+
+  async function logout() {
+
+    fetch('http://localhost:3000/logout')
+    .then((res) => res.json())
+    .then((message) => {
+
+      console.log(message);
+      setGmailProfile(null);
+      setApplications([]);
+
+
+    })
 
   }
 
@@ -139,12 +156,11 @@ function App() {
   }
 }
 
-  function categorizeApps_column (status: string) {
+  function categorizeApps_column (status: string, searchTerm: string) {
 
     return (
-
       
-      applications.filter((app) => app.status === status)
+      applications.filter((app) => app.status === status && app.company_name.toLowerCase().includes(searchTerm.toLowerCase()))
       .map((filteredApp) => (
         
         <li key={filteredApp.id}>
@@ -250,12 +266,12 @@ function App() {
                 <>
                 
                 <div className={`grid grid-cols-3 rounded-xl p-2 mb-4 bg-white gap-2 w-64 transition-[opacity,visibility] duration-200`}>                    
-                  <div className='col-start-1 col-span-2'>{filteredApp.company_name}</div>
+                  <div className='col-start-1 col-span-2 pointer-events-none'>{filteredApp.company_name}</div>
                   <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' onClick={() => {console.log('Info clicked, id:', filteredApp.id); setCheckingId(filteredApp.id);}}/></div>
-                  <div className='col-start-1 col-span-2 text-lg font-bold'>{filteredApp.role_title}</div>                                        
-                  <div className='col-start-1 col-span-2 text-slate-500 text-xs'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
+                  <div className='col-start-1 col-span-2 text-lg font-bold pointer-events-none'>{filteredApp.role_title}</div>                                        
+                  <div className='col-start-1 col-span-2 text-slate-500 text-xs pointer-events-none'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
                   <div className='col-start-1 col-span-2 text-xs text-slate-500 items-center'>
-                    <button className='mr-2 bg-slate-200 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
+                    <button className='mr-2 bg-slate-200 cursor-pointer p-2 z-10 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
                       
                       const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
                       
@@ -267,7 +283,7 @@ function App() {
 
                       }}>Delete</button>
 
-                    <button className='bg-slate-200 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
+                    <button className='bg-slate-200 cursor-pointer p-2 z-10 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
 
                       setEditingId(filteredApp.id);
 
@@ -278,7 +294,7 @@ function App() {
                   </div>
 
                   <select 
-                  className='mr-auto col-start-3 text-sm text-slate-500 focus:outline-none w-full cursor-pointer'                   
+                  className='mr-auto col-start-3 text-sm text-slate-500 focus:outline-none w-full cursor-pointer hover:text-slate-700 transition-text duration-200'                   
                   value={filteredApp.status}
                     onChange={(event) => {
 
@@ -295,10 +311,10 @@ function App() {
 
                 <div className={`fixed z-20 w-2xl rounded-xl bg-slate-200 p-2 top-50 left-110 transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
                   <div className='flex'>                                        
-                    <button className='ml-auto mr-2 text-slate-500 cursor-pointer' onClick={() => setCheckingId(null)}>✕</button>
+                    <button className='ml-auto mr-2 text-slate-500 cursor-pointer hover:text-slate-700 transition-text duration-300' onClick={() => setCheckingId(null)}>✕</button>
                   </div>
                   <div className='flex mb-2 text-4xl items-center'>
-                    <p className='mr-4'>{filteredApp.role_title}</p>
+                    <p className='mr-4 pointer-events-none'>{filteredApp.role_title}</p>
                     {status =='applied' 
                       && 
                     <Link className='mt-auto mb-1 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500 group'
@@ -325,14 +341,14 @@ function App() {
                     {status !== 'applied' && <Mail onClick={() => getGmailIdAndRedirect(filteredApp.id)} className='mt-auto mb-1 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500'/>} 
                   </div>
                   <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2'>
-                    <p className='text-2xl'>{filteredApp.company_name}</p>
-                    <p className='ml-auto text-slate-500'>Status: {status}</p>
+                    <p className='text-2xl pointer-events-none'>{filteredApp.company_name}</p>
+                    <p className='ml-auto text-slate-500 pointer-events-none'>Status: {status}</p>
                   </div>
                   <div className='flex mt-2 mb-2 items-center'>
                     <ReceiptText className='text-indigo-500'/>
-                    <p className='text-xl'>Details</p>
+                    <p className='text-xl pointer-events-none'>Details</p>
                   </div>
-                  <div className='flex p-2 indent-6'>
+                  <div className='flex p-2 indent-6 pointer-events-none'>
                     {filteredApp.notes}
                   </div>                              
                 </div>
@@ -352,11 +368,11 @@ function App() {
 
   }
 
-  function categorizeApps_list (status: string) {
+  function categorizeApps_list (status: string, searchTerm: string) {
 
     return (
 
-      applications.filter((app) => app.status === status)
+      applications.filter((app) => app.status === status && app.company_name.toLowerCase().includes(searchTerm.toLowerCase()))
       .map((filteredApp) => (
 
         <li key={filteredApp.id}>
@@ -457,11 +473,11 @@ function App() {
               <div className='bg-white grid grid-cols-5 gap-4 items-center px-4 py-2 rounded-xl'>
               
                 <div className='col-start-1'>
-                  <p className='text-2xl truncate'>{filteredApp.company_name}</p>
+                  <p className='text-2xl truncate pointer-events-none'>{filteredApp.company_name}</p>
                 </div>
 
                 <div className='col-start-1'>
-                  <p className='text-slate-500'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</p>
+                  <p className='text-slate-500 pointer-events-none'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</p>
                 </div>
 
                 <div className='flex col-start-2 row-start-1 gap-x-2 items-center justify-center'>
@@ -471,7 +487,7 @@ function App() {
                   </div>}
                                     
                   {status === 'applied' && <div className='relative self-center group'>
-                    <Link className='hover:text-indigo-500' 
+                    <Link className='cursor-pointer hover:text-indigo-500' 
                     onClick={() => {
 
                       if (isValidUrl(filteredApp.link) === true) {
@@ -494,8 +510,8 @@ function App() {
                   </div>}
 
                   <div className='relative self-center group'>
-                    <ReceiptText className='hover:text-indigo-500' onClick={() => setCheckingId(filteredApp.id)}/>
-                    <div className='p-2 absolute -translate-y-1/2 bottom-1/2 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:text-white visible transition-opacity duration-200 pointer-events-none'>Notes</div>
+                    <ReceiptText className='cursor-pointer hover:text-indigo-500' onClick={() => setCheckingId(filteredApp.id)}/>
+                    <div className='p-2 absolute -translate-y-1/2 bottom-1/2 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:text-white visible transition-opacity duration-200 pointer-events-none'>Details</div>
                   </div>
 
                 </div>
@@ -505,17 +521,17 @@ function App() {
                     <button className='ml-auto mr-2 text-slate-500 cursor-pointer' onClick={() => setCheckingId(null)}>✕</button>
                   </div>
                   <div className='flex mb-2 text-4xl items-center'>
-                    <p className='mr-4'>{filteredApp.role_title}</p>                                                            
+                    <p className='mr-4 pointer-events-none'>{filteredApp.role_title}</p>                                                            
                   </div>
                   <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2'>
-                    <p className='text-2xl'>{filteredApp.company_name}</p>
-                    <p className='ml-auto text-slate-500'>Status: {status}</p>
+                    <p className='text-2xl pointer-events-none'>{filteredApp.company_name}</p>
+                    <p className='ml-auto text-slate-500 pointer-events-none'>Status: {status}</p>
                   </div>
                   <div className='flex mt-2 mb-2 items-center'>
                     <ReceiptText className='text-indigo-500'/>
-                    <p className='text-xl'>Details</p>
+                    <p className='text-xl pointer-events-none'>Details</p>
                   </div>
-                  <div className='flex p-2 indent-6'>
+                  <div className='flex p-2 indent-6 pointer-events-none'>
                     {filteredApp.notes}
                   </div>                              
                 </div>
@@ -523,12 +539,12 @@ function App() {
 
 
 
-                <div className='col-start-3 row-start-1 row-end-2'>
+                <div className='col-start-3 row-start-1 row-end-2 pointer-events-none'>
                   <p >{filteredApp.role_title}</p>              
                 </div>
                 
                 <div className='col-start-4 row-start-1 row-end-2'>
-                  <select className='focus:outline-none cursor-pointer' value={filteredApp.status} onChange={(event) => updateStatus(filteredApp.id, event.target.value)}>
+                  <select className='focus:outline-none cursor-pointer hover:text-slate-700 transition-text duration-200' value={filteredApp.status} onChange={(event) => updateStatus(filteredApp.id, event.target.value)}>
 
                   <option value="applied">Applied</option>
                   <option value="interview">Interview</option>
@@ -539,7 +555,7 @@ function App() {
 
                 <div className='flex col-start-5 row-start-1 row-end-2 items-center'>
 
-                  <button className='ml-auto mr-2 bg-red-500 cursor-pointer p-2 z-10 rounded-xl' onClick={() => {
+                  <button className='ml-auto mr-2 bg-red-500 cursor-pointer p-2 z-10 rounded-xl hover:bg-red-600 transition-bg duration-300 hover:text-white transition-text duration-200' onClick={() => {
                       
                       const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
                       
@@ -551,7 +567,7 @@ function App() {
 
                       }}><Trash2/></button>
 
-                    <button className='ml-4 bg-indigo-500 cursor-pointer p-2 z-10 rounded-xl ' onClick={() => {
+                    <button className='ml-4 bg-indigo-500 cursor-pointer p-2 z-10 rounded-xl hover:bg-indigo-600 transition-bg duration-300 hover:text-white transition-text duration-200' onClick={() => {
 
                       setEditingId(filteredApp.id);
 
@@ -666,22 +682,22 @@ function App() {
     })
 
   }
-  
+
   return (
     <>
       {/* header */}
       <div className='flex relative items-center justify-between p-4'>
-        <p className="text-3xl">Job Application Tracker</p>                
+        <p className="text-3xl pointer-events-none">Job Application Tracker</p>                
         <div className='relative'>
         <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2'/>
-        <input type="text" className='rounded-full shadow-lg p-2 pl-10 inline-lg outline-none text-slate-500' placeholder='Search'/>        
+        <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='rounded-full shadow-lg p-2 pl-10 inline-lg outline-none text-slate-500' placeholder='Search by company name'/>        
         </div>
         {gmailProfile ? (
           <img 
             src={gmailProfile.profile_picture} 
             alt={gmailProfile.user_account}
             title={gmailProfile.user_account}
-            className='w-10 h-10 rounded-full absolute flex items-center left-296 cursor-pointer'
+            className='w-10 h-10 rounded-full absolute flex items-center left-296'
           />
           ) 
           : 
@@ -690,13 +706,13 @@ function App() {
           )}
 
         {/* Side panel button */}
-        <button className='cursor-pointer text-slate-500' onClick={() => setIsOpen(true)}>
+        <button className='cursor-pointer text-slate-700 hover:text-slate-500 transition-text duration-300' onClick={() => setIsOpen(true)}>
           <TextAlignJustify/>
         </button>        
       </div>
        
       {/* Add a new job button */}
-      <button className='m-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2' onClick={() => setIsHidden(false)}><Plus/> <p>New Job</p></button>
+      <button className='m-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2 hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => setIsHidden(false)}><Plus/> <p>New Job</p></button>
 
       {/* button for returning to top */}
       <button className={`fixed left-10 bottom-10 cursor-pointer rounded-xl text-white bg-indigo-500 p-2 transition-[opacity,visibility] duration-300 ${showButton? 'opacity-100 visible pointer-events-auto': 'opacity-0 invisible pointer-events-none'}`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp/></button>
@@ -722,9 +738,16 @@ function App() {
           </div>                    
         </div>
 
-        <div className='m-2 p-2 relative grid top-120 group bg-indigo-600 rounded-xl hover:bg-indigo-400 cursor-pointer' onClick={() => sync()}>                    
+        <div className='m-2 p-2 relative grid top-106 group bg-indigo-600 rounded-xl cursor-pointer hover:bg-indigo-400 transition-colors duration-300' onClick={() => sync()}>                    
             <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Sync</div>
             <button className={`text-white cursor-pointer ${isSyncing? 'animate-spin [animation-direction:reverse]':''}`}><RotateCcw/></button>          
+        </div>
+
+        
+        <div className='m-2 p-2 relative grid top-110 group bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => {confirm('Are you sure you want to logout?'); logout();}}>
+          <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Logout</div>
+          <button className='cursor-pointer'><LogOut/></button>
+
         </div>
         
       </aside>
@@ -735,10 +758,10 @@ function App() {
         {/* Column style */}
         {view == 'column' && <div className='grid grid-cols-4 ml-32 mr-24 gap-4'>
 
-          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Applied</p><ul>{categorizeApps_column('applied')}</ul></div>
-          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Interview</p><ul>{categorizeApps_column('interview')}</ul></div>
-          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Rejected</p><ul>{categorizeApps_column('rejected')}</ul></div>
-          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2'>Offered</p><ul>{categorizeApps_column('offer')}</ul></div>
+          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2 pointer-events-none'>Applied</p><ul>{categorizeApps_column('applied', searchTerm)}</ul></div>
+          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2 pointer-events-none'>Interview</p><ul>{categorizeApps_column('interview', searchTerm)}</ul></div>
+          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2 pointer-events-none'>Rejected</p><ul>{categorizeApps_column('rejected', searchTerm)}</ul></div>
+          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2 pointer-events-none'>Offered</p><ul>{categorizeApps_column('offer', searchTerm)}</ul></div>
 
         </div>}
 
@@ -746,23 +769,23 @@ function App() {
         {view == 'list' && <div className='grid gap-y-4'>
           
             <div className='p-4 ml-32 mr-24 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl'>
-              <p className='flex text-3xl items-center text-indigo-500'>Applied <FileUser className='ml-2'/></p>              
-              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('applied')}</ul>
+              <p className='flex text-3xl items-center text-indigo-500 pointer-events-none'>Applied <FileUser className='ml-2'/></p>              
+              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('applied', searchTerm)}</ul>
             </div>
 
             <div className='p-4 ml-32 mr-24 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl'>
-              <p className='flex text-3xl items-center text-indigo-500'>Interview <MessagesSquare className='ml-2'/></p>
-              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('interview')}</ul>
+              <p className='flex text-3xl items-center text-indigo-500 pointer-events-none'>Interview <MessagesSquare className='ml-2'/></p>
+              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('interview', searchTerm)}</ul>
             </div>
 
             <div className='p-4 ml-32 mr-24 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl'>
-              <p className='flex text-3xl items-center text-indigo-500'>Rejected <UserRoundX className='ml-2'/></p>
-              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('rejected')}</ul>
+              <p className='flex text-3xl items-center text-indigo-500 pointer-events-none'>Rejected <UserRoundX className='ml-2'/></p>
+              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('rejected', searchTerm)}</ul>
             </div>
           
             <div className='p-4 ml-32 mr-24 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl'>
-              <p className='flex text-3xl items-center text-indigo-500'>Offered <MessageSquareCheck className='ml-2'/></p>
-              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('offer')}</ul>
+              <p className='flex text-3xl items-center text-indigo-500 pointer-events-none'>Offered <MessageSquareCheck className='ml-2'/></p>
+              <ul className='grid grid-col-1 gap-y-4'>{categorizeApps_list('offer', searchTerm)}</ul>
             </div>
           
         </div>}
