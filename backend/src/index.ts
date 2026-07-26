@@ -244,6 +244,7 @@ app.get('/sync', async (req, res) => {
     if (!refresh_token) {
 
         console.log('No refresh token received.');
+        res.json({error: 'No Gmail account connected'});
         return;
 
     }
@@ -336,7 +337,7 @@ app.get('/logout', async (req, res) => {
 
     const result = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
 
-    const refresh_token = result.rows[0].refresh_token;
+    const refresh_token = result.rows[0]?.refresh_token;
 
     if (refresh_token) {
 
@@ -345,9 +346,19 @@ app.get('/logout', async (req, res) => {
     }
 
     await pool.query('DELETE FROM gmail_tokens');
+    await pool.query('DELETE FROM applications WHERE gmail_message_id is NOT NULL');
 
-    res.json({message: 'logged out successfully.'});
+    const queryResult = await pool.query('SELECT * FROM applications');
 
+
+    res.json({
+    message: 'Logged out successfully',
+    applications: queryResult.rows            
+
+    });
+
+
+    
 
 })
 

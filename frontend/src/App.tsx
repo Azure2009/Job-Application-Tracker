@@ -106,15 +106,14 @@ function App() {
 
     fetch('http://localhost:3000/logout')
     .then((res) => res.json())
-    .then((message) => {
+    .then((data) => {
 
-      console.log(message);
-      setGmailProfile(null);
-      setApplications([]);
-
-
+      console.log(data.message);
+      setGmailProfile(null);      
+      setApplications(data.applications);
+      
     })
-
+    
   }
 
   async function getGmailIdAndRedirect(id: number) {
@@ -744,7 +743,13 @@ function App() {
         </div>
 
         
-        <div className='m-2 p-2 relative grid top-110 group bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => {confirm('Are you sure you want to logout?'); logout();}}>
+        <div 
+        className='m-2 p-2 relative grid top-110 group bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors duration-300 hover:text-white transition-text duration-300' 
+        onClick={() => {
+          const userConfirmed = confirm('Are you sure you want to logout?'); 
+          if (userConfirmed) {logout()};                    
+          }}>
+
           <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Logout</div>
           <button className='cursor-pointer'><LogOut/></button>
 
