@@ -225,13 +225,28 @@ app.get('/auth/google/callback', async (req, res) => {
 
 });
 
+app.get('/verify-refresh-token', async (req, res) => {
+
+    const result = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
+
+    const refresh_token = result.rows[0]?.refresh_token;
+
+    res.json({refresh_token: refresh_token});
+
+})
+
 app.get('/gmailId/:id', async (req, res) => {
 
-    console.log('Received id:', req.params.id, '→ parsed:', parseInt(req.params.id));
     const primary_key = parseInt(req.params.id);
-    const result = await pool.query('SELECT gmail_message_id FROM applications WHERE id = $1', [primary_key]);
-    console.log('Result:', result.rows[0]);
-    res.json(result.rows[0]?.gmail_message_id);
+    const result1 = await pool.query('SELECT gmail_message_id FROM applications WHERE id = $1', [primary_key]);
+    const result2 = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
+    
+    res.json({
+        
+        refresh_token : result2.rows[0]?.refresh_token,
+        gmail_message_id : result1.rows[0]?.gmail_message_id
+        
+    });
 
 })
 
@@ -344,21 +359,17 @@ app.get('/logout', async (req, res) => {
         await oauth2Client.revokeToken(refresh_token);
 
     }
-
+    
     await pool.query('DELETE FROM gmail_tokens');
     await pool.query('DELETE FROM applications WHERE gmail_message_id is NOT NULL');
 
     const queryResult = await pool.query('SELECT * FROM applications');
-
 
     res.json({
     message: 'Logged out successfully',
     applications: queryResult.rows            
 
     });
-
-
-    
 
 })
 

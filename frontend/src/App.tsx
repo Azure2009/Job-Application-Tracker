@@ -62,7 +62,7 @@ function App() {
 
   const [searchTerm, setSearchTerm] = useState<string>('')
   
-  // Show Button when scrolled too far down.
+  // Show Button when scrolled far too down.
   useEffect(() => {
 
     function handleScroll() {
@@ -111,7 +111,7 @@ function App() {
       console.log(data.message);
       setGmailProfile(null);      
       setApplications(data.applications);
-      
+                  
     })
     
   }
@@ -121,12 +121,28 @@ function App() {
     console.log('getGmailIdAndRedirect called with id:', id);
     await fetch(`http://localhost:3000/gmailId/${id}`)
     .then((res) => res.json())
-    .then((gmail_message_id) => {
+    .then((data) => {
 
-      window.location.href = `https://mail.google.com/mail/u/0/#all/${gmail_message_id}`;
-      
+      if (data.refresh_token && data.gmail_message_id !== null) {
+
+        window.location.href = `https://mail.google.com/mail/u/0/#all/${data.gmail_message_id}`;
+
+      } else {
+
+        data.refresh_token? alert('No email found for this job application.') : alert('No gmail account is connected with job tracker.')
+
+      }
+            
     })
 
+
+  }
+
+  async function verifyRefreshToken(): Promise<boolean> {
+    
+   return fetch('http://localhost:3000/verify-refresh-token')
+    .then((res) => res.json())
+    .then((data) => !!data.refresh_token);
 
   }
 
@@ -745,9 +761,21 @@ function App() {
         
         <div 
         className='m-2 p-2 relative grid top-110 group bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors duration-300 hover:text-white transition-text duration-300' 
-        onClick={() => {
-          const userConfirmed = confirm('Are you sure you want to logout?'); 
-          if (userConfirmed) {logout()};                    
+        onClick={async () => {
+
+          const isConnected = await verifyRefreshToken();
+
+          if (isConnected) {
+  
+            const userConfirmed = confirm('Are you sure you want to logout?'); 
+            if (userConfirmed) {logout()};
+
+          } else {
+
+            alert('No gmail account is connected to job tracker.')
+
+          }
+                    
           }}>
 
           <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Logout</div>
