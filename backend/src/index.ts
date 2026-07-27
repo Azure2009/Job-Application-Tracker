@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { Pool } from 'pg';
 import { google } from 'googleapis';
+import he from 'he';
 
 dotenv.config();
 
@@ -331,7 +332,7 @@ app.get('/sync', async (req, res) => {
                     INSERT INTO applications(company_name, status, applied_date, notes, gmail_message_id, link) 
                     VALUES ($1, $2, $3, $4, $5, $6)
                     ON CONFLICT (gmail_message_id) DO NOTHING`, 
-                    [email.company_name, email.status, email.date? new Date(email.date): new Date(), email.snippet, email.id, email.link]
+                    [email.company_name, email.status, email.date? new Date(email.date): new Date(), he.decode(email.snippet), email.id, email.link]
                 );
 
 

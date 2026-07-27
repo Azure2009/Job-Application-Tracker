@@ -702,8 +702,8 @@ function App() {
     <>
       {/* header */}
       <div className='flex relative items-center justify-between p-4'>
-        <p className="text-3xl pointer-events-none">Job Application Tracker</p>                
-        <div className='relative'>
+        <p className="text-3xl font-extrabold text-indigo-500 pointer-events-none">Search Sync</p>               
+        <div className='relative'>        
         <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2'/>
         <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='rounded-full shadow-lg p-2 pl-10 inline-lg outline-none text-slate-500' placeholder='Search by company name'/>        
         </div>
@@ -712,7 +712,7 @@ function App() {
             src={gmailProfile.profile_picture} 
             alt={gmailProfile.user_account}
             title={gmailProfile.user_account}
-            className='w-10 h-10 rounded-full absolute flex items-center left-296'
+            className='w-10 h-10 rounded-full absolute flex items-center left-280'
           />
           ) 
           : 
@@ -725,7 +725,8 @@ function App() {
           <TextAlignJustify/>
         </button>        
       </div>
-       
+      {/* short text about web app */}
+       <p className='ml-4 mb-10 relative text-slate-500 pointer-events-none'>Sync Better, Track Smarter</p>
       {/* Add a new job button */}
       <button className='m-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2 hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => setIsHidden(false)}><Plus/> <p>New Job</p></button>
 
