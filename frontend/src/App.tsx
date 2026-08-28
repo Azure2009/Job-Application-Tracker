@@ -80,7 +80,7 @@ function App() {
 
   useEffect(() => {
 
-    fetch('http://localhost:3000/gmail-profile')
+    fetch(`${import.meta.env.VITE_API_URL}/gmail-profile`)
     .then((res) => res.json())
     .then((data) => setGmailProfile(data))
     console.log('Profile:', gmailProfile)
@@ -92,8 +92,8 @@ function App() {
   async function sync() {
 
   setIsSyncing(true);
-  await fetch(`http://localhost:3000/sync`)
-  .then(() => fetch(`http://localhost:3000/applications`))
+  await fetch(`${import.meta.env.VITE_API_URL}/sync`)
+  .then(() => fetch(`${import.meta.env.VITE_API_URL}/applications`))
   .then((res) => res.json())
   .then((apps) => {
     setApplications(apps);
@@ -104,7 +104,7 @@ function App() {
 
   async function logout() {
 
-    fetch('http://localhost:3000/logout')
+    fetch(`${import.meta.env.VITE_API_URL}/logout`)
     .then((res) => res.json())
     .then((data) => {
 
@@ -119,7 +119,7 @@ function App() {
   async function getGmailIdAndRedirect(id: number) {
     
     console.log('getGmailIdAndRedirect called with id:', id);
-    await fetch(`http://localhost:3000/gmailId/${id}`)
+    await fetch(`${import.meta.env.VITE_API_URL}/gmailId/${id}`)
     .then((res) => res.json())
     .then((data) => {
 
@@ -140,7 +140,7 @@ function App() {
 
   async function verifyRefreshToken(): Promise<boolean> {
     
-   return fetch('http://localhost:3000/verify-refresh-token')
+   return fetch(`${import.meta.env.VITE_API_URL}/verify-refresh-token`)
     .then((res) => res.json())
     .then((data) => !!data.refresh_token);
 
@@ -148,7 +148,7 @@ function App() {
 
   function connectGmail() {
 
-    window.location.href = 'http://localhost:3000/auth/google';
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
     
   }
 
@@ -156,7 +156,7 @@ function App() {
 
   useEffect(() => {
 
-    fetch(`http://localhost:3000/applications`)
+    fetch(`${import.meta.env.VITE_API_URL}/applications`)
     .then((res) => res.json())
     .then((data) => setApplications(data))
 
@@ -623,7 +623,7 @@ function App() {
 
   async function deleteApplication (id: number) {
 
-  fetch(`http://localhost:3000/applications/${id}`, 
+  fetch(`${import.meta.env.VITE_API_URL}/applications/${id}`, 
     {
       method: 'DELETE'
 
@@ -634,7 +634,7 @@ function App() {
 
   async function updateStatus (id: number, status: string) {
 
-  fetch(`http://localhost:3000/applications/${id}`, 
+  fetch(`${import.meta.env.VITE_API_URL}/applications/${id}`, 
     {
       method: 'PATCH',
       headers: {
@@ -664,7 +664,7 @@ function App() {
 
   async function saveEdit(id: number) {
 
-    fetch(`http://localhost:3000/applications/${id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/applications/${id}`, {
 
       method: 'PATCH',
       headers: {
@@ -831,7 +831,7 @@ function App() {
 
             event.preventDefault();
 
-            fetch(`http://localhost:3000/applications`, {
+            fetch(`${import.meta.env.VITE_API_URL}/applications`, {
               method: 'POST', 
               headers: {
 
