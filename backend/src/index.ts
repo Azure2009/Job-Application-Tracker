@@ -227,7 +227,7 @@ app.get('/auth/google/callback', async (req, res) => {
         [email, tokens.refresh_token, picture]
     );
 
-    res.redirect('http://localhost:5173/');
+    res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173/');
 
 });
 
