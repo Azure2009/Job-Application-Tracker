@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LogOut, MessageSquareCheck, UserRoundX, MessagesSquare, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser } from 'lucide-react'
+import { LogOut, MessageSquareCheck, UserRoundX, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser, MessagesSquare, CircleX, HandCoins  } from 'lucide-react'
 
 interface Application {
 
@@ -701,11 +701,12 @@ function App() {
   return (
     <>
       {/* header */}
-      <div className='flex relative items-center justify-between p-4'>
+      <div className='flex flex-col relative items-center justify-between p-4 mb-10'>
         <p className="text-3xl font-extrabold text-indigo-500 pointer-events-none">Search Sync</p>               
+        <p className='mb-10 relative text-slate-500 pointer-events-none'>Sync Better, Track Smarter</p>
         <div className='relative'>        
         <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2'/>
-        <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='rounded-full shadow-lg p-2 pl-10 inline-lg outline-none text-slate-500' placeholder='Search by company name'/>        
+        <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='rounded-full shadow-lg p-2 pl-10 inline-fit outline-none text-slate-500' placeholder='Search by company name'/>        
         </div>
         {gmailProfile ? (
           <img 
@@ -721,14 +722,12 @@ function App() {
           )}
 
         {/* Side panel button */}
-        <button className='cursor-pointer text-slate-700 hover:text-slate-500 transition-text duration-300' onClick={() => setIsOpen(true)}>
+        <button className='absolute right-0 -translate-x-2 translate-y-2 cursor-pointer text-slate-700 hover:text-slate-500 transition-text duration-300' onClick={() => setIsOpen(true)}>
           <TextAlignJustify/>
         </button>        
       </div>
-      {/* short text about web app */}
-       <p className='ml-4 mb-10 relative text-slate-500 pointer-events-none'>Sync Better, Track Smarter</p>
       {/* Add a new job button */}
-      <button className='m-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2 hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => setIsHidden(false)}><Plus/> <p>New Job</p></button>
+      <button className='absolute left-4 bottom-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2 hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => setIsHidden(false)}><Plus/></button>
 
       {/* button for returning to top */}
       <button className={`fixed left-10 bottom-10 cursor-pointer rounded-xl text-white bg-indigo-500 p-2 transition-[opacity,visibility] duration-300 ${showButton? 'opacity-100 visible pointer-events-auto': 'opacity-0 invisible pointer-events-none'}`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp/></button>
@@ -737,51 +736,53 @@ function App() {
       <div className={`fixed z-4 top-0 left-0 h-1000 w-1000 bg-black/75 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible pointer-events-auto'}`}></div>
 
       {/* side panel */}
-      <aside className={`fixed top-0 right-0 z-10 h-full w-10% bg-indigo-500 transition-transform duration-300 ease-out p-2 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
-
-        <div className='p-2 flex h-10 relative items-center text-xl justify-center text-slate-400'>
+      <aside className={`fixed top-0 right-0 z-10 h-full w-8 bg-indigo-500 transition-transform duration-300 ease-out p-2 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
+        
+        <div className='p-2 flex mt-2 mb-10 h-10 relative items-center text-xl justify-center text-slate-400'>
           <button className='relative cursor-pointer hover:text-slate-300 transition-colors duration-200' onClick={() => setIsOpen(false)}>✕</button>
         </div>
 
-        <div className='grid relative top-20 text-5xl text-white p-2 justify-center'>
+        <div className='flex flex-col text-white gap-4 justify-center'>
           <div className='relative self-center group'>
-            <button onClick={() => setView('column')} className='flex items-center cursor-pointer hover:bg-indigo-600 transition-colors duration-200  rounded-xl p-2'><Columns2/></button>
-            <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-16 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Column</div>
+            <button onClick={() => setView('column')} className='flex items-center cursor-pointer hover:bg-indigo-600 transition-colors duration-200 rounded-xl'><Columns2 className='scale-80'/></button>
+            <div className='px-[1.5px] absolute -translate-y-5 -translate-x-[50px] text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Column</div>
           </div>
-          <div className='mt-10 relative self-center group'>
-            <button onClick={() => setView('list')} className='flex items-center cursor-pointer hover:bg-indigo-600 transition-colors duration-200 rounded-xl p-2'><List/></button>
-            <div className='p-2 absolute -translate-y-1/2 bottom-1/2 right-16 text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>List</div>
+          <div className='relative self-center group'>
+            <button onClick={() => setView('list')} className='flex items-center cursor-pointer hover:bg-indigo-600 transition-colors duration-200 rounded-xl'><List className='scale-80'/></button>
+            <div className='px-[1.5px] absolute -translate-y-5 -translate-x-[27px] text-xs bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>List</div>
           </div>                    
         </div>
 
-        <div className='m-2 p-2 relative grid top-106 group bg-indigo-600 rounded-xl cursor-pointer hover:bg-indigo-400 transition-colors duration-300' onClick={() => sync()}>                    
-            <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Sync</div>
-            <button className={`text-white cursor-pointer ${isSyncing? 'animate-spin [animation-direction:reverse]':''}`}><RotateCcw/></button>          
-        </div>
+        <div className='absolute bottom-4 right-[2px] flex flex-col gap-2'>
+          
+          <div className='relative flex group bg-indigo-600 rounded-xl cursor-pointer hover:bg-indigo-400 transition-colors duration-300' onClick={() => sync()}>                    
+            <div className='px-[2px] absolute -translate-x-8.5 translate-y-[4px] text-xs bg-black text-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Sync</div>
+            <button className={`p-[1.5px] text-white cursor-pointer ${isSyncing? 'animate-spin [animation-direction:reverse]':''}`}><RotateCcw className='scale-80'/></button>          
+          </div>
+          
+          <div 
+          className='flex justify-center group bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors duration-300 hover:text-white transition-text duration-300' 
+          onClick={async () => {
 
-        
-        <div 
-        className='m-2 p-2 relative grid top-110 group bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors duration-300 hover:text-white transition-text duration-300' 
-        onClick={async () => {
+            const isConnected = await verifyRefreshToken();
 
-          const isConnected = await verifyRefreshToken();
+            if (isConnected) {
+    
+              const userConfirmed = confirm('Are you sure you want to logout?'); 
+              if (userConfirmed) {logout()};
 
-          if (isConnected) {
-  
-            const userConfirmed = confirm('Are you sure you want to logout?'); 
-            if (userConfirmed) {logout()};
+            } else {
 
-          } else {
+              alert('No gmail account is connected to job tracker.')
 
-            alert('No gmail account is connected to job tracker.')
+            }
+                      
+            }}>
 
-          }
-                    
-          }}>
+            <div className='p-[1.5px] -translate-x-10 translate-y-[1px] absolute text-xs bg-black text-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Logout</div>
+            <button className='cursor-pointer'><LogOut className='scale-80'/></button>
 
-          <div className='p-2 absolute text-xs bg-black text-white bottom-1/2 -translate-y-1/2 right-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Logout</div>
-          <button className='cursor-pointer'><LogOut/></button>
-
+          </div>
         </div>
         
       </aside>
@@ -790,12 +791,31 @@ function App() {
       {/* 3 views with 4 categories */}
 
         {/* Column style */}
-        {view == 'column' && <div className='grid grid-cols-4 ml-32 mr-24 gap-4'>
+        {view == 'column' && <div className='grid grid-cols-4 gap-x-10 mx-10'>
+          
+          <div className='relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200'>
+            <div className='absolute opacity-0 -translate-y-6 -translate-x-[14px] invisible px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200'>Applied</div>
+            <FileUser className='grid justify-self-center'/>
+            <ul>{categorizeApps_column('applied', searchTerm)}</ul>
+          </div>
 
-          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2 pointer-events-none'>Applied</p><ul>{categorizeApps_column('applied', searchTerm)}</ul></div>
-          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2 pointer-events-none'>Interview</p><ul>{categorizeApps_column('interview', searchTerm)}</ul></div>
-          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2 pointer-events-none'>Rejected</p><ul>{categorizeApps_column('rejected', searchTerm)}</ul></div>
-          <div className='h-full bg-slate-100 justify-items-center-safe rounded-xl pl-4 pr-4 pb-4'><p className='text-slate-500 mb-2 pointer-events-none'>Offered</p><ul>{categorizeApps_column('offer', searchTerm)}</ul></div>
+          <div className='relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200'>
+            <div className='absolute opacity-0 -translate-y-6 -translate-x-[19px] invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200'>Interview</div>
+            <MessagesSquare className='grid justify-self-center'/>
+            <ul>{categorizeApps_column('interview', searchTerm)}</ul>
+          </div>
+
+          <div className='relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200'>
+            <div className='absolute opacity-0 -translate-y-6 -translate-x-4 invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200'>Rejected</div>
+            <CircleX className='grid justify-self-center'/>
+            <ul>{categorizeApps_column('rejected', searchTerm)}</ul>
+          </div>
+
+          <div className='relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200'>
+            <div className='absolute opacity-0 -translate-y-6 -translate-x-[6.5px] invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200'>Offer</div>
+            <HandCoins className='grid justify-self-center'/>
+            <ul>{categorizeApps_column('offer', searchTerm)}</ul>
+          </div>
 
         </div>}
 
