@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LogOut, MessageSquareCheck, UserRoundX, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser, MessagesSquare, CircleX, HandCoins  } from 'lucide-react'
+import { Undo2, LogOut, MessageSquareCheck, UserRoundX, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser, MessagesSquare, CircleX, HandCoins  } from 'lucide-react'
 
 interface Application {
 
@@ -60,7 +60,9 @@ function App() {
 
   const [gmailProfile, setGmailProfile] = useState<{ user_account: string, profile_picture: string} | null>(null);
 
-  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const [focusOn, setFocusOn] = useState<string>('');
   
   // Show Button when scrolled far too down.
   useEffect(() => {
@@ -701,26 +703,37 @@ function App() {
   return (
     <>
       {/* header */}
-      <div className='flex flex-col relative items-center justify-between p-4 mb-10'>
-        <p className="text-3xl font-extrabold text-indigo-500 pointer-events-none">Search Sync</p>               
-        <p className='mb-10 relative text-slate-500 pointer-events-none'>Sync Better, Track Smarter</p>
-        <div className='relative'>        
-        <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2'/>
-        <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='rounded-full shadow-lg p-2 pl-10 inline-fit outline-none text-slate-500' placeholder='Search by company name'/>        
+      <div className='flex flex-col gap-4 relative items-center justify-between p-4 mb-10'>
+        <div className='flex flex-col items-center'>
+          <p className="text-3xl font-extrabold text-indigo-500 pointer-events-none">Search Sync</p>               
+          <p className='relative text-slate-500 pointer-events-none'>Sync Better, Track Smarter</p>
         </div>
         {gmailProfile ? (
           <img 
             src={gmailProfile.profile_picture} 
             alt={gmailProfile.user_account}
             title={gmailProfile.user_account}
-            className='w-10 h-10 rounded-full absolute flex items-center left-280'
+            className='w-10 h-10 rounded-full absolute flex items-center left-2 top-4'
           />
           ) 
           : 
           (
-            <button className='absolute flex items-center left-300 cursor-pointer text-slate-700 p-2 rounded-full text-lg justify-center text-slate-500 border-none hover:text-indigo-500 transition-text duration-300' onClick={() => connectGmail()}>Connect gmail</button>
-          )}
+            <div className='flex gap-x-2 p-2 items-center cursor-pointer rounded-xl bg-slate-500 hover:bg-slate-600 transition-bg duration-300' onClick={() => connectGmail()}>
+              <p className='text-slate-200'>Connect gmail</p>
+              <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+              className=' w-10 h-10 bg-slate-400 rounded-xl p-[4px] fill-slate-200'>
+                <title>Gmail</title>
+                <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
+              </svg>
+            </div>
+          )
+        }
 
+        <div className='relative'>        
+          <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2'/>
+          <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='rounded-full shadow-3xl p-2 pl-10 inline-fit outline-none text-slate-500' placeholder='Search by company name'/>        
+        </div>
+        
         {/* Side panel button */}
         <button className='absolute right-0 -translate-x-2 translate-y-2 cursor-pointer text-slate-700 hover:text-slate-500 transition-text duration-300' onClick={() => setIsOpen(true)}>
           <TextAlignJustify/>
@@ -787,32 +800,66 @@ function App() {
         
       </aside>
 
-
       {/* 3 views with 4 categories */}
 
         {/* Column style */}
-        {view == 'column' && <div className='grid grid-cols-4 gap-x-10 mx-10'>
+        {view == 'column' && <div className='grid grid-cols-4 gap-x-10 gap-y-4 mx-10'>
           
-          <div className='relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200'>
-            <div className='absolute opacity-0 -translate-y-6 -translate-x-[14px] invisible px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200'>Applied</div>
+          <Undo2 onClick={()=> setFocusOn('')} className={`text-slate-500 cursor-pointer w-fit justify-self-center col-span-4 ${focusOn !== ''? '' : 'hidden'}`}/>
+
+          <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'applied'? 'hidden' : ''}`}>Applied</p>
+          <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'interview'? 'hidden' : ''}`}>Interview</p>
+          <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'rejected'? 'hidden' : ''}`}>Rejected</p>
+          <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'offer'? 'hidden' : ''}`}>Offer</p>
+          <div 
+          onClick={() => {
+
+            setFocusOn('applied');
+          
+          }} 
+          id='applied' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'applied')? 'hidden' : '' } ${focusOn == 'applied'? '-translate-x-[7px]' : ''}`}
+          >
+            <div className={`absolute opacity-0 -translate-y-6 -translate-x-[14px] invisible px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'applied'? 'hidden pointer-events-none' : ''}`}>Applied</div>
             <FileUser className='grid justify-self-center'/>
             <ul>{categorizeApps_column('applied', searchTerm)}</ul>
           </div>
 
-          <div className='relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200'>
-            <div className='absolute opacity-0 -translate-y-6 -translate-x-[19px] invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200'>Interview</div>
+          <div 
+          onClick={() => {
+
+            setFocusOn('interview');
+            
+          }} 
+          id='interview' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'interview')? 'hidden' : '' } ${focusOn == 'interview'? 'translate-x-[4px]' : ''}`}
+          >
+            <div className={`absolute opacity-0 -translate-y-6 -translate-x-[19px] invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'interview'? 'hidden pointer-events-none' : ''}`}>Interview</div>
             <MessagesSquare className='grid justify-self-center'/>
             <ul>{categorizeApps_column('interview', searchTerm)}</ul>
           </div>
 
-          <div className='relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200'>
-            <div className='absolute opacity-0 -translate-y-6 -translate-x-4 invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200'>Rejected</div>
+          <div 
+          onClick={() => {
+            
+            setFocusOn('rejected');
+            
+          }} 
+          id='rejected' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'rejected')? 'hidden' : '' } ${focusOn == 'rejected'? '-translate-x-[1.5px]' : ''}`}
+          >
+            <div className={`absolute opacity-0 -translate-y-6 -translate-x-4 invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'rejected'? 'hidden pointer-events-none' : ''}`}>Rejected</div>
             <CircleX className='grid justify-self-center'/>
             <ul>{categorizeApps_column('rejected', searchTerm)}</ul>
           </div>
 
-          <div className='relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200'>
-            <div className='absolute opacity-0 -translate-y-6 -translate-x-[6.5px] invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200'>Offer</div>
+          <div 
+          onClick={() => {
+
+            setFocusOn('offer');
+            
+
+          }} 
+          id='offer' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'offer')? 'hidden' : '' } ${focusOn == 'offer'? '-translate-x-6' : ''}`}
+          >
+            <div className={`absolute opacity-0 -translate-y-6 -translate-x-[6.5px] invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'offer'? 'hidden pointer-events-none' : ''}`}>Offer</div>
             <HandCoins className='grid justify-self-center'/>
             <ul>{categorizeApps_column('offer', searchTerm)}</ul>
           </div>
@@ -845,7 +892,7 @@ function App() {
         </div>}
 
       {/* new application */}
-      <div className={`fixed z-20 w-6xl rounded-xl bg-slate-200 top-50 left-50 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none': 'opacity-100 visible pointer-events-auto'}`}>
+      <div className={`fixed z-20 top-40 rounded-xl bg-slate-200 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none': 'opacity-100 visible pointer-events-auto'}`}>
 
           <form className='grid grid-cols-2 p-4 gap-x-4' onSubmit={ async (event) => {
 
@@ -872,7 +919,7 @@ function App() {
             .then((newApp) => setApplications((prev) => [...prev, newApp]))
             .then(() => {resetForm()})
 
-          }}>
+            }}>
             
             
               <label className='text-slate-500' htmlFor='company_name'>Company Name</label>
