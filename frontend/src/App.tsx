@@ -283,9 +283,9 @@ function App() {
                 <>
                 
                 <div className={`grid grid-cols-3 rounded-xl p-2 mb-4 bg-white gap-2 w-64 transition-[opacity,visibility] duration-200`}>                    
-                  <div className='col-start-1 col-span-2 pointer-events-none'>{filteredApp.company_name}</div>
+                  <div className='col-start-1 col-span-2 pointer-events-none truncate'>{filteredApp.company_name}</div>
                   <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' onClick={() => {console.log('Info clicked, id:', filteredApp.id); setCheckingId(filteredApp.id);}}/></div>
-                  <div className='col-start-1 col-span-2 text-lg font-bold pointer-events-none'>{filteredApp.role_title}</div>                                        
+                  <div className='col-start-1 col-span-2 text-lg font-bold pointer-events-none truncate'>{filteredApp.role_title}</div>                                        
                   <div className='col-start-1 col-span-2 text-slate-500 text-xs pointer-events-none'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
                   <div className='col-start-1 col-span-2 text-xs text-slate-500 items-center'>
                     <button className='mr-2 bg-slate-200 cursor-pointer p-2 z-10 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
@@ -320,13 +320,13 @@ function App() {
                     }}>
                     <option value='applied'>applied</option>
                     <option value='interview'>interview</option>
-                    <option value='offer'>offer</option>
                     <option value='rejected'>rejected</option>
+                    <option value='offer'>offer</option>
                   </select>
 
                 </div>
 
-                <div className={`fixed z-20 w-2xl rounded-xl bg-slate-200 p-2 top-50 left-110 transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                <div className={`fixed inset-0 z-20 w-screen bg-slate-200 p-2 transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
                   <div className='flex'>                                        
                     <button className='ml-auto mr-2 text-slate-500 cursor-pointer hover:text-slate-700 transition-text duration-300' onClick={() => setCheckingId(null)}>✕</button>
                   </div>
@@ -740,7 +740,7 @@ function App() {
         </button>        
       </div>
       {/* Add a new job button */}
-      <button className='absolute left-4 bottom-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2 hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => setIsHidden(false)}><Plus/></button>
+      <button className='fixed z-10 left-4 bottom-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2 hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => setIsHidden(false)}><Plus/></button>
 
       {/* button for returning to top */}
       <button className={`fixed left-10 bottom-10 cursor-pointer rounded-xl text-white bg-indigo-500 p-2 transition-[opacity,visibility] duration-300 ${showButton? 'opacity-100 visible pointer-events-auto': 'opacity-0 invisible pointer-events-none'}`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp/></button>
@@ -803,65 +803,113 @@ function App() {
       {/* 3 views with 4 categories */}
 
         {/* Column style */}
-        {view == 'column' && <div className='grid grid-cols-4 gap-x-10 gap-y-4 mx-10'>
+        {view == 'column' && <div className='grid grid-cols-4 gap-x-10 gap-y-4 mx-6'>
           
-          <Undo2 onClick={()=> setFocusOn('')} className={`text-slate-500 cursor-pointer w-fit justify-self-center col-span-4 ${focusOn !== ''? '' : 'hidden'}`}/>
+          { focusOn !=='' && <div className='relative w-fit justify-self-center col-span-4 group'>
+            <div className='absolute -translate-y-6 -translate-x-4 opacity-0 invisible bg-black text-white text-xs px-[1.5px] border-[2px] border-slate-500 group-hover:opacity-100 visible transition-all duration-200'>back</div>
+            <Undo2 onClick={()=> setFocusOn('')} className={`text-slate-500 cursor-pointer ${focusOn !== ''? '' : 'hidden'}`}/>
+          </div>}
 
-          <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'applied'? 'hidden' : ''}`}>Applied</p>
-          <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'interview'? 'hidden' : ''}`}>Interview</p>
-          <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'rejected'? 'hidden' : ''}`}>Rejected</p>
-          <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'offer'? 'hidden' : ''}`}>Offer</p>
-          <div 
-          onClick={() => {
+          <div className='flex flex-col'>
+            
+            <div className='flex'>
+              <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'applied'? 'hidden' : ''}`}>Applied</p>
+              <div 
+              onClick={() => {
 
-            setFocusOn('applied');
+                setFocusOn('applied');
+              
+              }} 
+              id='applied' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'applied')? 'hidden' : '' } ${focusOn == 'applied'? 'translate-x-[7px] hover:cursor-default' : ''}`}
+              >
+                <div className={`absolute opacity-0 -translate-y-6 -translate-x-[12px] invisible px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'applied'? 'hidden pointer-events-none' : ''}`}>Applied</div>
+                <FileUser className='grid justify-self-center'/>
+              </div>
+            </div>
+
+            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-fit mt-2 ${applications.filter((app)=> app.status === 'applied').length == 0? 'min-w-72 min-h-58' : ''} ${(focusOn !== 'applied')? 'hidden' : '' }`}>
+              { applications.filter((app)=> app.status === 'applied').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
+                  <p>No Job Application posted here</p>
+                </div>}
+
+              <ul>{categorizeApps_column('applied', searchTerm)}</ul>
+            </div>
+          </div>
           
-          }} 
-          id='applied' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'applied')? 'hidden' : '' } ${focusOn == 'applied'? '-translate-x-[7px]' : ''}`}
-          >
-            <div className={`absolute opacity-0 -translate-y-6 -translate-x-[14px] invisible px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'applied'? 'hidden pointer-events-none' : ''}`}>Applied</div>
-            <FileUser className='grid justify-self-center'/>
-            <ul>{categorizeApps_column('applied', searchTerm)}</ul>
+          <div className={`flex flex-col ${focusOn == 'interview'? '-translate-x-20' : ''}`}>
+            <div className='flex'>
+              <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'interview'? 'hidden' : ''}`}>Interview</p>
+              <div 
+              onClick={() => {
+
+                setFocusOn('interview');
+                
+              }} 
+              id='interview' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'interview')? 'hidden' : '' } ${focusOn == 'interview'? 'translate-x-2 hover:cursor-default' : ''}`}
+              >
+                <div className={`absolute opacity-0 -translate-y-6 -translate-x-3.5 invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'interview'? 'hidden pointer-events-none' : ''}`}>Interview</div>
+                <MessagesSquare className='grid justify-self-center'/>
+              </div>
+            </div>
+          
+            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-fit mt-2 ${applications.filter((app)=> app.status === 'interview').length == 0? 'min-w-72 min-h-58' : ''} ${(focusOn !== 'interview')? 'hidden' : '' }`}>
+              { applications.filter((app)=> app.status === 'interview').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
+                  <p>No Job Application posted here</p>
+                </div>}
+
+              <ul>{categorizeApps_column('interview', searchTerm)}</ul>
+            </div>
           </div>
+          
+          <div className={`flex flex-col ${focusOn == 'rejected'? '-translate-x-40' : ''} `}>
+            <div className='flex'>
+              <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'rejected'? 'hidden' : ''}`}>Rejected</p>
+              <div 
+              onClick={() => {
+                
+                setFocusOn('rejected');
+                
+              }} 
+              id='rejected' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'rejected')? 'hidden' : '' } ${focusOn == 'rejected'? 'translate-x-2 hover:cursor-default' : ''}`}
+              >
+                <div className={`absolute opacity-0 -translate-y-6 -translate-x-3 invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'rejected'? 'hidden pointer-events-none' : ''}`}>Rejected</div>
+                <CircleX className='grid justify-self-center'/>
+              </div>
+            </div>
 
-          <div 
-          onClick={() => {
+            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-fit mt-2 ${applications.filter((app)=> app.status === 'rejected').length == 0? 'min-w-72 min-h-58' : ''} ${(focusOn !== 'rejected')? 'hidden' : '' }`}>
+              { applications.filter((app)=> app.status === 'rejected').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
+                  <p>No Job Application posted here</p>
+                </div>}
 
-            setFocusOn('interview');
-            
-          }} 
-          id='interview' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'interview')? 'hidden' : '' } ${focusOn == 'interview'? 'translate-x-[4px]' : ''}`}
-          >
-            <div className={`absolute opacity-0 -translate-y-6 -translate-x-[19px] invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'interview'? 'hidden pointer-events-none' : ''}`}>Interview</div>
-            <MessagesSquare className='grid justify-self-center'/>
-            <ul>{categorizeApps_column('interview', searchTerm)}</ul>
+              <ul>{categorizeApps_column('rejected', searchTerm)}</ul>
+            </div>
           </div>
+          
+          <div className={`flex flex-col ${focusOn == 'offer'? '-translate-x-60' : ''}`}>
+            <div className='flex'>
+              <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'offer'? 'hidden' : ''}`}>Offer</p>
+              <div 
+              onClick={() => {
 
-          <div 
-          onClick={() => {
-            
-            setFocusOn('rejected');
-            
-          }} 
-          id='rejected' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'rejected')? 'hidden' : '' } ${focusOn == 'rejected'? '-translate-x-[1.5px]' : ''}`}
-          >
-            <div className={`absolute opacity-0 -translate-y-6 -translate-x-4 invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'rejected'? 'hidden pointer-events-none' : ''}`}>Rejected</div>
-            <CircleX className='grid justify-self-center'/>
-            <ul>{categorizeApps_column('rejected', searchTerm)}</ul>
-          </div>
+                setFocusOn('offer');
+                
 
-          <div 
-          onClick={() => {
+              }} 
+              id='offer' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'offer')? 'hidden' : '' } ${focusOn == 'offer'? 'translate-x-2 hover:cursor-default' : ''}`}
+              >
+                <div className={`absolute opacity-0 -translate-y-6 -translate-x-[2.5px] invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'offer'? 'hidden pointer-events-none' : ''}`}>Offer</div>
+                <HandCoins className='grid justify-self-center'/>
+              </div>
+            </div>
 
-            setFocusOn('offer');
-            
+            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-fit mt-2 ${applications.filter((app)=> app.status === 'offer').length == 0? 'min-w-72 min-h-58' : ''} ${(focusOn !== 'offer')? 'hidden' : '' }`}>
+              { applications.filter((app)=> app.status === 'offer').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
+                  <p>No Job Application posted here</p>
+                </div>}
 
-          }} 
-          id='offer' className={`relative group rounded-xl text-slate-500 bg-slate-100 p-[5px] cursor-pointer hover:bg-slate-200 transition-bg duration-200 ${(focusOn !== '' && focusOn !== 'offer')? 'hidden' : '' } ${focusOn == 'offer'? '-translate-x-6' : ''}`}
-          >
-            <div className={`absolute opacity-0 -translate-y-6 -translate-x-[6.5px] invisible px-[1.5px] px-[3px] bg-slate-200 text-xs text-slate-500 rounded-xl font-bold group-hover:visible opacity-100 transition-all duration-200 ${focusOn == 'offer'? 'hidden pointer-events-none' : ''}`}>Offer</div>
-            <HandCoins className='grid justify-self-center'/>
-            <ul>{categorizeApps_column('offer', searchTerm)}</ul>
+              <ul>{categorizeApps_column('offer', searchTerm)}</ul>
+            </div>
           </div>
 
         </div>}
@@ -892,7 +940,7 @@ function App() {
         </div>}
 
       {/* new application */}
-      <div className={`fixed z-20 top-40 rounded-xl bg-slate-200 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none': 'opacity-100 visible pointer-events-auto'}`}>
+      <div className={`fixed z-20 top-40 mx-2 rounded-xl bg-slate-200 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none': 'opacity-100 visible pointer-events-auto'}`}>
 
           <form className='grid grid-cols-2 p-4 gap-x-4' onSubmit={ async (event) => {
 
@@ -975,8 +1023,7 @@ function App() {
             
           </form>          
 
-        </div>
-      
+        </div>      
     </>
   )
 }
