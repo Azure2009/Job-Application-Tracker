@@ -176,23 +176,19 @@ function App() {
   function categorizeApps_column (status: string, searchTerm: string) {
 
     return (
-      
+
       applications.filter((app) => app.status === status && app.company_name.toLowerCase().includes(searchTerm.toLowerCase()))
       .map((filteredApp) => (
         
-        <li key={filteredApp.id}>
+        <li key={filteredApp.id} className='relative'>
                 {editingId === filteredApp.id ? 
                 
                 <>
 
-                  <div className='fixed z-20 w-2xl rounded-xl bg-slate-200 p-8 top-50 left-110'>
+                  <div className='z-20 w-full h-114 rounded-xl bg-slate-200 p-8'>
 
-                    <div className='grid grid-cols-2 pb-2 mb-4 items-center border-b-2 border-indigo-500'>
-
-                        <p className='col-start-1 text-2xl font-bold'>{filteredApp.role_title}</p>
-                        <p className='col-start-1 text-2xl'>{filteredApp.company_name}</p>
-                                    
-                        <div className='ml-auto col-start-2 row-start-1 row-span-2 items-center'>
+                    <div className='grid grid-cols-2 pb-2 mb-4 items-center border-b-2 border-indigo-500'>              
+                      <div className='flex col-start-1 row-start-1 row-span-2 items-center'>
                         <input
                           className='mr-2 text-xl px-4 py-2 bg-white rounded-xl cursor-pointer' 
                           type="button" 
@@ -220,7 +216,7 @@ function App() {
 
                           }}
                         />
-                        </div>
+                      </div>
                     </div>  
                     
                     <div className='grid grid-cols-2'>
@@ -282,93 +278,95 @@ function App() {
                 
                 <>
                 
-                <div className={`grid grid-cols-3 rounded-xl p-2 mb-4 bg-white gap-2 w-64 transition-[opacity,visibility] duration-200`}>                    
-                  <div className='col-start-1 col-span-2 pointer-events-none truncate'>{filteredApp.company_name}</div>
-                  <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' onClick={() => {console.log('Info clicked, id:', filteredApp.id); setCheckingId(filteredApp.id);}}/></div>
-                  <div className='col-start-1 col-span-2 text-lg font-bold pointer-events-none truncate'>{filteredApp.role_title}</div>                                        
-                  <div className='col-start-1 col-span-2 text-slate-500 text-xs pointer-events-none'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
-                  <div className='col-start-1 col-span-2 text-xs text-slate-500 items-center'>
-                    <button className='mr-2 bg-slate-200 cursor-pointer p-2 z-10 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
-                      
-                      const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
-                      
-                      if (deleteConfirmed) {
-
-                        deleteApplication(filteredApp.id);
-
-                      }
-
-                      }}>Delete</button>
-
-                    <button className='bg-slate-200 cursor-pointer p-2 z-10 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
-
-                      setEditingId(filteredApp.id);
-
-                      setEditingDraft({...filteredApp});
-
-                    }}>Edit</button>
-                    
-                  </div>
-
-                  <select 
-                  className='mr-auto col-start-3 text-sm text-slate-500 focus:outline-none w-full cursor-pointer hover:text-slate-700 transition-text duration-200'                   
-                  value={filteredApp.status}
-                    onChange={(event) => {
-
-                      updateStatus(filteredApp.id, event.target.value);
-
-                    }}>
-                    <option value='applied'>applied</option>
-                    <option value='interview'>interview</option>
-                    <option value='rejected'>rejected</option>
-                    <option value='offer'>offer</option>
-                  </select>
-
-                </div>
-
-                <div className={`fixed inset-0 z-20 w-screen bg-slate-200 p-2 transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
-                  <div className='flex'>                                        
-                    <button className='ml-auto mr-2 text-slate-500 cursor-pointer hover:text-slate-700 transition-text duration-300' onClick={() => setCheckingId(null)}>✕</button>
-                  </div>
-                  <div className='flex mb-2 text-4xl items-center'>
-                    <p className='mr-4 pointer-events-none'>{filteredApp.role_title}</p>
-                    {status =='applied' 
-                      && 
-                    <Link className='mt-auto mb-1 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500 group'
-                    onClick={() => {
-
-                      if (isValidUrl(filteredApp.link) === true) {
-
-                        window.location.href = filteredApp.link
-
-                      } else if (filteredApp.link === 'No link provided.') {
-
-                        alert('No link provided.')
-
-                      } else {
+                  <div className={`grid grid-cols-3 rounded-xl p-2 mb-4 bg-white gap-2 w-64 transition-[opacity,visibility] duration-200`}>                    
+                    <div className='col-start-1 col-span-2 pointer-events-none truncate'>{filteredApp.company_name}</div>
+                    <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' onClick={() => {console.log('Info clicked, id:', filteredApp.id); setCheckingId(filteredApp.id);}}/></div>
+                    <div className='col-start-1 col-span-2 text-lg font-bold pointer-events-none truncate'>{filteredApp.role_title}</div>                                        
+                    <div className='col-start-1 col-span-2 text-slate-500 text-xs pointer-events-none'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
+                    <div className='col-start-1 col-span-2 text-xs text-slate-500 items-center'>
+                      <button className='mr-2 bg-slate-200 cursor-pointer p-2 z-10 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
                         
-                        alert('Not a valid link.')
+                        const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
+                        
+                        if (deleteConfirmed) {
 
-                      }
+                          deleteApplication(filteredApp.id);
 
-                    }}
-                    
-                    />}
-                    
-                    {status !== 'applied' && <Mail onClick={() => getGmailIdAndRedirect(filteredApp.id)} className='mt-auto mb-1 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500'/>} 
+                        }
+
+                        }}>Delete</button>
+
+                      <button className='bg-slate-200 cursor-pointer p-2 z-10 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
+
+                        setEditingId(filteredApp.id);
+
+                        setEditingDraft({...filteredApp});
+
+                      }}>Edit</button>
+                      
+                    </div>
+
+                    <select 
+                    className='mr-auto col-start-3 text-sm text-slate-500 focus:outline-none w-full cursor-pointer hover:text-slate-700 transition-text duration-200'                   
+                    value={filteredApp.status}
+                      onChange={(event) => {
+
+                        updateStatus(filteredApp.id, event.target.value);
+
+                      }}>
+                      <option value='applied'>applied</option>
+                      <option value='interview'>interview</option>
+                      <option value='rejected'>rejected</option>
+                      <option value='offer'>offer</option>
+                    </select>
+
                   </div>
-                  <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2'>
-                    <p className='text-2xl pointer-events-none'>{filteredApp.company_name}</p>
-                    <p className='ml-auto text-slate-500 pointer-events-none'>Status: {status}</p>
+
+                  {/* Extra info card */}
+                  <div className={`absolute left-0 top-0 z-20 rounded-xl w-64 h-full bg-slate-200 p-2 flex flex-col overflow-y-auto info-card-scroll transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'shadow-xl/30 opacity-100 visible border-4 border-indigo-500 pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                    <div className='flex'>                                        
+                      <button className='ml-auto mr-2 text-slate-500 cursor-pointer hover:text-slate-700 transition-text duration-300' onClick={() => setCheckingId(null)}>✕</button>
+                    </div>
+                    <div className='flex mb-2 items-center gap-6'>
+
+
+                      <p className='relative col-start-1 truncate text-lg' title={filteredApp.role_title}>{filteredApp.role_title}</p>
+                       
+                      <Link className={`mt-auto mb-1 ml-auto mr-10 w-30 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500 group ${filteredApp.status === 'applied'? 'opacity-100 visible' : 'hidden'}`}
+                      onClick={() => {
+
+                        if (isValidUrl(filteredApp.link) === true) {
+
+                          window.location.href = filteredApp.link
+
+                        } else if (filteredApp.link === 'No link provided.') {
+
+                          alert('No link provided.')
+
+                        } else {
+                          
+                          alert('Not a valid link.')
+
+                        }
+
+                      }}
+                      
+                      />
+                      
+                      <Mail onClick={() => getGmailIdAndRedirect(filteredApp.id)} className={`col-start-2 col-span-3 w-20 mr-auto translate-y-[3px] text-slate-600 cursor-pointer opacity-0 invisible transition-text duration-300 hover:text-indigo-500 ${filteredApp.status !== 'applied'? 'opacity-100 visible' : ''}`}/> 
+                    </div>
+                    <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2 gap-4'>
+                      <p className='text-2xl truncate' title={filteredApp.company_name}>{filteredApp.company_name}</p>
+                      <p className='ml-auto translate-y-[2px] text-slate-500 pointer-events-none'>Status: {filteredApp.status}</p>
+                    </div>
+                    <div className='flex mt-2 mb-2 items-center'>
+                      <ReceiptText className='text-indigo-500'/>
+                      <p className='text-xl pointer-events-none'>Details</p>
+                    </div>
+                    <div className='flex-1  p-2 indent-6'>
+                      {filteredApp.notes}
+                    </div>                              
                   </div>
-                  <div className='flex mt-2 mb-2 items-center'>
-                    <ReceiptText className='text-indigo-500'/>
-                    <p className='text-xl pointer-events-none'>Details</p>
-                  </div>
-                  <div className='flex p-2 indent-6 pointer-events-none'>
-                    {filteredApp.notes}
-                  </div>                              
-                </div>
 
                 </>
                 
@@ -567,7 +565,7 @@ function App() {
                   <option value="interview">Interview</option>
                   <option value="rejected">Rejected</option>
                   <option value="offer">Offer</option>
-                </select>
+                  </select>
                 </div>
 
                 <div className='flex col-start-5 row-start-1 row-end-2 items-center'>
@@ -740,14 +738,14 @@ function App() {
         </button>        
       </div>
       {/* Add a new job button */}
-      <button className='fixed z-10 left-4 bottom-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2 hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => setIsHidden(false)}><Plus/></button>
+      <button className='fixed z-50 left-4 bottom-4 flex text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 p-2 hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' onClick={() => setIsHidden(false)}><Plus/></button>
 
-      {/* button for returning to top */}
-      <button className={`fixed left-10 bottom-10 cursor-pointer rounded-xl text-white bg-indigo-500 p-2 transition-[opacity,visibility] duration-300 ${showButton? 'opacity-100 visible pointer-events-auto': 'opacity-0 invisible pointer-events-none'}`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp/></button>
-
+      {/* button for returning to top */}  
+      <button className={`fixed left-4 bottom-16 z-50 cursor-pointer rounded-xl text-indigo-500 border-solid border outline-indigo-500 outline-2 p-2 transition-[opacity,visibility] duration-300 ${showButton? 'opacity-100 visible pointer-events-auto': 'opacity-0 invisible pointer-events-none'} hover:bg-indigo-500 hover:text-white transition-all duration-300`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp/></button>
+      
       {/* Overlay a blackened screen when add application window is open */}
       <div className={`fixed z-4 top-0 left-0 h-1000 w-1000 bg-black/75 transition-[opacity,visibility] duration-300 ${isHidden? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible pointer-events-auto'}`}></div>
-
+        
       {/* side panel */}
       <aside className={`fixed top-0 right-0 z-10 h-full w-8 bg-indigo-500 transition-transform duration-300 ease-out p-2 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
         
@@ -807,7 +805,7 @@ function App() {
           
           { focusOn !=='' && <div className='relative w-fit justify-self-center col-span-4 group'>
             <div className='absolute -translate-y-6 -translate-x-4 opacity-0 invisible bg-black text-white text-xs px-[1.5px] border-[2px] border-slate-500 group-hover:opacity-100 visible transition-all duration-200'>back</div>
-            <Undo2 onClick={()=> setFocusOn('')} className={`text-slate-500 cursor-pointer ${focusOn !== ''? '' : 'hidden'}`}/>
+            <Undo2 onClick={()=> {setFocusOn(''); setCheckingId(null)}} className={`text-slate-500 cursor-pointer ${focusOn !== ''? '' : 'hidden'}`}/>
           </div>}
 
           <div className='flex flex-col'>
