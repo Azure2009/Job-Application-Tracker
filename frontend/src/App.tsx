@@ -207,7 +207,7 @@ function App() {
               <MessagesSquare className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
             </div>
 
-            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-full mt-2 ${applications.filter((app)=> app.status === 'interview').length == 0? 'min-w-72 min-h-58' : ''}`}>
+            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-full mt-2 ${applications.filter((app)=> app.status === 'interview').length == 0? '' : ''}`}>
               { applications.filter((app)=> app.status === 'interview').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
                   <p>No Job Application posted here</p>
                 </div>}
@@ -223,7 +223,7 @@ function App() {
               <UserRoundX className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
             </div>
 
-            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-full mt-2 ${applications.filter((app)=> app.status === 'rejected').length == 0? 'min-w-72 min-h-58' : ''}`}>
+            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-full mt-2 ${applications.filter((app)=> app.status === 'rejected').length == 0? '' : ''}`}>
               { applications.filter((app)=> app.status === 'rejected').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
                   <p>No Job Application posted here</p>
                 </div>}
@@ -269,10 +269,10 @@ function App() {
                 
                 <>
 
-                  <div className='fixed inset-0 z-10 w-64 h-114 md:justify-self-center rounded-xl mx-8 top-30 h-fit bg-slate-200 p-8'>
+                  <div className='fixed grid inset-0 z-10 w-64 mobileM:w-80 md:w-160 lg:w-200 justify-self-center self-center rounded-xl  h-fit bg-slate-200 p-8'>
 
                     <div className='grid grid-cols-2 pb-2 mb-4 items-center border-b-2 border-indigo-500'>              
-                      <div className='flex col-start-1 row-start-1 row-span-2 items-center'>
+                      <div className='flex col-start-1 col-span-2 ml-auto items-center'>
                         <input
                           className='mr-2 text-xl px-4 py-2 bg-white rounded-xl cursor-pointer' 
                           type="button" 
@@ -307,7 +307,7 @@ function App() {
                     
                     <div className='grid grid-cols-2'>
                       <div className='col-start-1'>
-                      <label className='text-xs pb-2 mr-2 cursor-pointer' htmlFor="company_name">Company Name</label>
+                      <label className='text-xs md:text-lg pb-2 mr-2 cursor-pointer' htmlFor="company_name">Company Name</label>
                       <input
                         type='text'
                         id='company_name'
@@ -318,7 +318,7 @@ function App() {
                       </div>
                       
                       <div className='ml-4 col-start-2'>
-                      <label className='text-xs pb-2 mr-2 cursor-pointer' htmlFor="role_title">Role Title</label>
+                      <label className='text-xs md:text-lg pb-2 mr-2 cursor-pointer' htmlFor="role_title">Role Title</label>
                       <input
                         type='text'                    
                         className='flex mb-2 text-base rounded-xl p-2 border-2 border-slate-300 w-full focus:border-indigo-500 focus:outline-none'
@@ -329,7 +329,7 @@ function App() {
                       </div>
 
                       <div className='col-start-1 col-span-2'>
-                        <label htmlFor="link">Link</label>
+                        <label htmlFor="link" className='md:text-lg'>Link</label>
                         <input
                         className='flex p-2 text-base border-2 border-slate-300 focus:outline-none focus:border-indigo-500 rounded-xl w-full' 
                         type="text"
@@ -342,7 +342,7 @@ function App() {
                     </div>
 
                     <div className=''>
-                      <label className='cursor-pointer' htmlFor="notes">Details</label>
+                      <label className='cursor-pointer md:text-lg' htmlFor="notes">Details</label>
                       <textarea 
                       onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}   
                       id='notes' 
@@ -368,13 +368,13 @@ function App() {
                     <div title={filteredApp.company_name} className='col-start-1 col-span-2 cursor-default'>
                       <p className='truncate'>{filteredApp.company_name}</p>
                     </div>
-                    <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info onClick={() => {setIsACardOpen(true); setCheckingId(filteredApp.id)}} className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' /></div>
+                    <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info onClick={() => {setIsACardOpen(true); setCheckingId(filteredApp.id); document.body.style.overflow = 'hidden'}} className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' /></div>
                     <div className='col-start-1 col-span-2 text-lg font-bold cursor-default' title={filteredApp.role_title}>
                       <p className='truncate'>{filteredApp.role_title}</p>
                     </div>                                        
                     <div className='col-start-1 col-span-2 text-slate-500 text-xs pointer-events-none'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
-                    <div className='md:flex md:flex-col md:gap-2 col-start-1 col-span-2 text-xs my-2 text-slate-500 max-md:items-center'>
-                      <button className='mr-2 bg-slate-200 md:w-fit cursor-pointer p-2 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
+                    <div className='md:max-lg:flex md:max-lg:flex-col lg:flex lg:col-span-3 col-start-1 col-span-2 text-xs my-2 text-slate-500 max-md:items-center'>
+                      <button className='mr-2 bg-slate-200 md:w-fit cursor-pointer md:max-lg:mb-2 p-2 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
                         
                         const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
                         
@@ -400,7 +400,7 @@ function App() {
                     </div>
 
                     <select 
-                    className='mr-auto col-start-3 md:col-start-1 md:col-span-2 text-sm text-slate-500 focus:outline-none w-full cursor-pointer hover:text-slate-700 transition-text duration-200'                   
+                    className='max-lg:mr-auto max-lg:col-start-3 md:max-lg::col-start-1 md:max-lg:col-span-2 lg:col-start-2 lg:col-span-2 lg:inline-fit lg:ml-auto text-sm text-slate-500 focus:outline-none w-full cursor-pointer hover:text-slate-700 transition-text duration-200'                   
                     value={filteredApp.status}
                       onChange={(event) => {
 
@@ -416,16 +416,15 @@ function App() {
                   </div>
 
                   {/* Extra info card */}
-                  <div className={`fixed inset-0 left-0 justify-self-center self-center z-20 rounded-xl w-150 h-fit bg-slate-200 p-2 flex flex-col overflow-y-auto info-card-scroll transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'shadow-xl/30 opacity-100 visible border-4 border-indigo-500 pointer-events-auto' : 'hidden'}`}>
+                  <div className={`fixed inset-0 left-0 justify-self-center self-center z-20 rounded-xl mobileS:max-md:mx-2 w-64 mobileM:w-80 md:w-150 3xl:w-250 h-fit bg-slate-200 p-2 flex flex-col overflow-y-auto info-card-scroll transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'shadow-xl/30 opacity-100 visible border-4 border-indigo-500 pointer-events-auto' : 'hidden'}`}>
                     <div className='flex'>                                        
-                      <button className='ml-auto mr-2 text-slate-500 cursor-pointer hover:text-slate-700 transition-text duration-300' onClick={() => {setCheckingId(null); setIsACardOpen(false)}}>✕</button>
+                      <button className='ml-auto mr-2 text-slate-500 cursor-pointer hover:text-slate-700 transition-text duration-300' onClick={() => {setCheckingId(null); setIsACardOpen(false); document.body.style.overflow = ''}}>✕</button>
                     </div>
                     <div className='flex mb-2 items-center'>
 
-
-                      <p className='relative truncate text-4xl mr-2' title={filteredApp.role_title}>{filteredApp.role_title}</p>
+                      <p className='relative truncate text-4xl mr-4' title={filteredApp.role_title}>{filteredApp.role_title}</p>
                        
-                      <Link className={`mt-auto mb-1 ml-auto mr-10 w-30 text-slate-600 cursor-pointer transition-text duration-300 hover:text-indigo-500 group ${filteredApp.status === 'applied'? 'opacity-100 visible' : 'hidden'}`}
+                      <Link className={`flex w-fit text-slate-600 translate-y-[2px] cursor-pointer transition-text duration-300 hover:text-indigo-500 group ${filteredApp.status === 'applied'? 'opacity-100 visible' : 'hidden'}`}
                       onClick={() => {
 
                         if (isValidUrl(filteredApp.link) === true) {
@@ -451,7 +450,11 @@ function App() {
                     </div>
                     <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2 gap-4'>
                       <p className='text-2xl truncate' title={filteredApp.company_name}>{filteredApp.company_name}</p>
-                      <p className='ml-auto translate-y-[2px] text-slate-500 pointer-events-none'>Status: {filteredApp.status}</p>
+                      <div className='flex gap-1 ml-auto translate-y-[2px] text-slate-500 pointer-events-none'>
+                        <p>Status:</p>
+                        <p>{filteredApp.status}</p>
+                      </div>
+                      
                     </div>
                     <div className='flex mt-2 mb-2 items-center'>
                       <ReceiptText className='text-indigo-500'/>
@@ -582,7 +585,7 @@ function App() {
             
             <>
               
-              <div className='bg-slate-300 grid grid-cols-6 w-66 items-center px-2 py-2 rounded-xl'>
+              <div className='bg-slate-300 grid grid-cols-6 items-center px-2 py-2 rounded-xl'>
               
                 <div title={filteredApp.company_name} className='col-start-1 col-span-3'>
                   <p className='text-slate-700 truncate pointer-events-none'>{filteredApp.company_name}</p>
@@ -772,10 +775,10 @@ function App() {
           ) 
           : 
           (
-            <div className='flex md:order-3 gap-x-2 p-2 items-center cursor-pointer rounded-xl bg-slate-500 hover:bg-slate-600 transition-bg duration-300' onClick={() => connectGmail()}>
-              <p className='text-slate-200'>Connect gmail</p>
+            <div className='flex md:order-3 gap-x-2 p-2 items-center cursor-pointer rounded-xl max-lg:bg-slate-500 hover:max-lg:bg-slate-600 max-lg:transition-bg max-lg:duration-300' onClick={() => connectGmail()}>
+              <p className='text-slate-200 lg:text-lg lg:text-slate-700 lg:transition-text lg:duration-300 lg:hover:text-indigo-500'>Connect gmail</p>
               <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-              className=' w-10 h-10 bg-slate-400 rounded-xl p-[4px] fill-slate-200'>
+              className=' w-10 h-10 bg-slate-400 rounded-xl p-[4px] fill-slate-200 min-lg:hidden'>
                 <title>Gmail</title>
                 <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
               </svg>
@@ -785,27 +788,38 @@ function App() {
 
         <div className='relative'>        
           <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2'/>
-          <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='rounded-full shadow-3xl p-2 pl-10 inline-fit outline-none text-slate-500' placeholder='Search by company name'/>        
+          <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='rounded-full shadow-xl/10 p-2 pl-10 pr-6 inline-fit 3xl:inline-100 outline-none text-slate-500' placeholder='Search by company name'/>        
         </div>
         
         {/* Side panel button */}
         
-        <TextAlignJustify className='max-md:absolute md:order-4 md:w-8 md:h-8 right-0 md:-translate-y-[1.5px] -translate-x-2 translate-y-2 cursor-pointer text-slate-700 hover:text-slate-500 transition-text duration-300' onClick={() => setIsOpen(true)}/>
+        <TextAlignJustify className='max-md:absolute md:order-4 md:max-lg:w-8 md:max-lg:h-8 right-0 md:-translate-y-[1.5px] -translate-x-2 translate-y-2 cursor-pointer text-slate-700 hover:text-slate-500 transition-text duration-300' onClick={() => setIsOpen(true)}/>
         
       </div>
-      {/* Add a new job button */}
+      
+      {/* new job button */}
+      <div className='max-lg:hidden'>
+        <div onClick={() => {setIsACardOpen(true); setisNewJobFormHidden(false); document.body.style.overflow = 'hidden';}} 
+        className='cursor-pointer relative flex items-center group text-indigo-500 border-2 border-indigo-500 w-fit rounded-full p-2 ml-4 mb-4 transition-all duration-300 hover:bg-indigo-500 hover:text-white'
+        >
+          <Plus/>
+          <p>New Job</p>
+        </div>
+      </div>
+
+      {/* new job shortcut button  */}
       <div className='fixed z-4 left-4 bottom-4'>
         <div className='relative flex items-center group'>
-          <Plus onClick={() => {setIsACardOpen(true); setisNewJobFormHidden(false); document.body.style.overflow = 'hidden';}} className={`md:w-13 md:h-13 w-8 h-8 text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 md:w-12 md:h-12 ${isNewJobFormHidden? 'hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' : ''}`}/>
-          <div className={`absolute opacity-0 invisible pointer-events-none text-xs translate-x-8 md:text-base ml-2 bg-indigo-500 text-white text-nowrap px-[1.5px] md:px-[3px] md:translate-x-14 font-semibold ${isNewJobFormHidden? 'group-hover:opacity-100 visible transition-all duration-300' : ''}`}>Add job application</div>
+          <Plus onClick={() => {setIsACardOpen(true); setisNewJobFormHidden(false); document.body.style.overflow = 'hidden';}} className={`md:w-13 md:h-13 w-8 h-8 lg:w-10 lg:h-10 text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 md:w-12 md:h-12 ${isNewJobFormHidden? 'hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' : ''}`}/>
+          <div className={`absolute opacity-0 invisible pointer-events-none text-xs translate-x-8 md:text-base ml-2 bg-indigo-500 text-white text-nowrap px-[1.5px] md:px-[3px] md:translate-x-14 lg:translate-x-10 font-semibold ${isNewJobFormHidden? 'group-hover:opacity-100 visible transition-all duration-300' : ''}`}>Add job application</div>
         </div>
       </div>
 
       {/* button for returning to top */}
       <div className={`fixed z-4 left-[16px] md:left-[18px] md:bottom-20 bottom-16 transition-[opacity,visibility] duration-300 ${showButton? 'opacity-100 visible pointer-events-auto': 'opacity-0 invisible pointer-events-none'}`}>  
         <div className='relative flex items-center group'>
-          <button className={`cursor-pointer rounded-xl md:w-12 md:h-12 w-8 h-8 flex justify-center items-center text-indigo-500 border-solid border outline-indigo-500 outline-2 p-2 hover:bg-indigo-500 hover:text-white transition-all duration-300`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp className='md:scale-150 scale-140'/></button>
-          <div className='absolute opacity-0 invisible text-nowrap md:translate-x-14.5 md:text-base translate-x-10 text-xs pointer-events-none font-medium bg-indigo-500 text-white px-[1.5px] group-hover:opacity-100 visible transition-all duration-300'>Return to top</div>
+          <button className={`cursor-pointer rounded-xl md:w-12 md:h-12 w-8 h-8 lg:w-10 lg:h-10 lg:-translate-x-[2.5px] lg:translate-y-2 flex justify-center items-center text-indigo-500 border-solid border outline-indigo-500 outline-2 p-2 hover:bg-indigo-500 hover:text-white transition-all duration-300`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp className='md:scale-150 scale-140'/></button>
+          <div className='absolute opacity-0 invisible text-nowrap md:translate-x-14.5 md:text-base translate-x-10 lg:translate-y-2 lg:translate-x-12 text-xs pointer-events-none font-medium bg-indigo-500 text-white px-[1.5px] group-hover:opacity-100 visible transition-all duration-300'>Return to top</div>
         </div>
       </div>  
 
@@ -909,8 +923,6 @@ function App() {
           <UserRoundX className='grid justify-self-center'/>
         </div>
         
-
-        
         {/* <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'offer'? 'hidden' : ''}`}>Offer</p> */}
         <div 
         onClick={() => {
@@ -944,7 +956,7 @@ function App() {
             <p className='font-bold text-slate-500'>Applied</p>
             <FileUser className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
           </div>
-          <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-fit mt-2 ${applications.filter((app)=> app.status === 'applied').length == 0? 'min-w-72 min-h-58' : ''}`}>
+          <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-fit mt-2 ${applications.filter((app)=> app.status === 'applied').length == 0? '' : ''}`}>
             { applications.filter((app)=> app.status === 'applied').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
                 <p>No Job Application posted here</p>
               </div>}
@@ -1004,32 +1016,19 @@ function App() {
       </div>}
 
       {/* list style */}
-      {view == 'list' && <div className='grid gap-y-4 px-2 justify-items-center'>
-        
-        <div className='p-4 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl w-fit'>
-          <p className='flex items-center text-indigo-500 pointer-events-none'>Applied <FileUser className='ml-2'/></p>
-          { applications.filter((app) => app.status === 'applied').length == 0 && <p className='text-slate-600 mx-5'>No Job Application posted here</p>}
-          <ul className='grid grid-col-1 gap-y-4 w-fit'>{categorizeApps_list('applied', searchTerm)}</ul>
+      {view == 'list' && <div className='flex flex-col items-center gap-2'>
+        <div>
+          <p>Applied</p>
         </div>
-
-        <div className='p-4 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl w-fit'>
-          <p className='flex items-center text-indigo-500 pointer-events-none'>Interview <MessagesSquare className='ml-2'/></p>
-          <ul className='grid grid-col-1 gap-y-4 w-fit'>{categorizeApps_list('interview', searchTerm)}</ul>
-          { applications.filter((app) => app.status === 'interview').length == 0 && <p className='text-slate-600 mx-5'>No Job Application posted here</p>}
+        <div>
+          <p>Interview</p>
         </div>
-
-        <div className='p-4 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl w-fit'>
-          <p className='flex items-center text-indigo-500 pointer-events-none'>Rejected <UserRoundX className='ml-2'/></p>
-          <ul className='grid grid-col-1 gap-y-4 w-fit'>{categorizeApps_list('rejected', searchTerm)}</ul>
-          { applications.filter((app) => app.status === 'rejected').length == 0 && <p className='text-slate-600 mx-5'>No Job Application posted here</p>}
+        <div>
+          <p>Rejected</p>
         </div>
-      
-        <div className='p-4 grid grid-col-1 gap-y-4 bg-slate-100 rounded-xl w-fit'>
-          <p className='flex items-center text-indigo-500 pointer-events-none'>Offered <MessageSquareCheck className='ml-2'/></p>
-          <ul className='grid grid-col-1 gap-y-4 w-fit'>{categorizeApps_list('offer', searchTerm)}</ul>
-          { applications.filter((app) => app.status === 'offer').length == 0 && <p className='text-slate-600 mx-5'>No Job Application posted here</p>}
+        <div>
+          <p>Offer</p>
         </div>
-          
       </div>}
 
       {layout_md()}
@@ -1046,7 +1045,7 @@ function App() {
       ></div>
 
       {/* new application */}
-      <div className={`fixed md:inset-0 md:w-fit md:h-fit self-center justify-self-center z-20 max-md:top-40 mx-2 rounded-xl bg-slate-200 transition-[opacity,visibility] duration-300 ${isNewJobFormHidden? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible pointer-events-auto'}`}>
+      <div className={`fixed md:inset-0 md:max-lg:w-fit md:h-fit self-center justify-self-center z-20 max-md:top-40 mx-2 rounded-xl bg-slate-200 transition-[opacity,visibility] duration-300 ${isNewJobFormHidden? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible pointer-events-auto'}`}>
 
         <form className='grid grid-cols-2 p-4 gap-x-4' onSubmit={ async (event) => {
 
@@ -1076,9 +1075,9 @@ function App() {
           }}>
           
           
-            <label className='text-slate-500' htmlFor='company_name'>Company Name</label>
+            <label className='text-slate-500 md:text-lg' htmlFor='company_name'>Company Name</label>
                       
-            <label className='text-slate-500' htmlFor='role_title'>Role Title</label>
+            <label className='text-slate-500 md:text-lg' htmlFor='role_title'>Role Title</label>
           
             <input className='rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none p-2'
             required
@@ -1098,7 +1097,7 @@ function App() {
             onChange={(event) => setRoleTitle(event.target.value)}
             />
 
-            <label className='mt-4 text-slate-500' htmlFor="link">Link</label>
+            <label className='mt-4 text-slate-500 md:text-lg' htmlFor="link">Link</label>
             <input
             required
             autoComplete='off'
@@ -1109,7 +1108,7 @@ function App() {
             onChange={(event) => setLink(event.target.value)}
             />
 
-            <label className='col-span-2 mt-4 text-slate-500' htmlFor='notes'>Details(Optional)</label>
+            <label className='col-span-2 mt-4 text-slate-500 md:text-lg' htmlFor='notes'>Details(Optional)</label>
             <textarea
             autoComplete='off'
             className='resize-none col-span-2 rounded-xl border-2 border-slate-300 mb-4 focus:border-indigo-500 focus:outline-none p-2' 

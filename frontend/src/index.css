@@ -2,11 +2,12 @@
 
 @theme {
 
-    --breakpoint-mobileS: 20rem;
-    --breakpoint-mobileM: 23.438rem;
-    --breakpoint-mobileL: 26.563rem;
-    --breakpoint-3xl: 124.625rem;
-    --breakpoint-4xl: 160rem;
+  --breakpoint-mobileS: 20rem;
+  --breakpoint-mobileM: 23.438rem;
+  --breakpoint-mobileL: 26.563rem;
+  --breakpoint-3xl: 90rem;
+  --breakpoint-4xl: 124.625rem;
+  --breakpoint-5xl: 160rem;
 
 }
 
