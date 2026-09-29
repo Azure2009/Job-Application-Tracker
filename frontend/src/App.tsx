@@ -177,7 +177,7 @@ function App() {
 
   function layout_md() {
 
-    // How the frontend will look like when screen size is equal or more than 768px
+    // How the two view types(column and list) will look like when screen size is equal or more than 768px
 
     return (
 
@@ -187,13 +187,13 @@ function App() {
         
           <div className='flex flex-col items-center'>
             
-            <div className='flex gap-2 px-2 py-[2.5px] rounded-xl'>
-              <p className='font-bold text-slate-500'>Applied</p>
-              <FileUser className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
+            <div className='flex gap-2 px-2 py-[2.5px] rounded-xl items-center'>
+              <p className='font-bold text-slate-500 5xl:text-3xl'>Applied</p>
+              <FileUser className='text-slate-500 bg-slate-100 px-[4px] rounded-xl 5xl:w-12 5xl:h-12'/>
             </div>
-            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-full mt-2 ${applications.filter((app)=> app.status === 'applied').length == 0? 'min-w-72 min-h-58' : ''}`}>
+            <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-full mt-2 ${applications.filter((app)=> app.status === 'applied').length == 0? '' : ''}`}>
               { applications.filter((app)=> app.status === 'applied').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
-                  <p>No Job Application posted here</p>
+                  <p className='5xl:text-2xl'>No Job Application posted here</p>
                 </div>}
 
               <ul>{categorizeApps_column('applied', searchTerm)}</ul>
@@ -202,14 +202,14 @@ function App() {
           
           <div className='flex flex-col items-center'>
             
-            <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl'>
-              <p className='font-bold text-slate-500'>Interview</p>
-              <MessagesSquare className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
+            <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl items-center'>
+              <p className='font-bold text-slate-500 5xl:text-3xl'>Interview</p>
+              <MessagesSquare className='text-slate-500 bg-slate-100 px-[4px] rounded-xl 5xl:w-12 5xl:h-12'/>
             </div>
 
             <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-full mt-2 ${applications.filter((app)=> app.status === 'interview').length == 0? '' : ''}`}>
               { applications.filter((app)=> app.status === 'interview').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
-                  <p>No Job Application posted here</p>
+                  <p className='5xl:text-2xl'>No Job Application posted here</p>
                 </div>}
 
               <ul>{categorizeApps_column('interview', searchTerm)}</ul>
@@ -218,14 +218,14 @@ function App() {
           
           <div className='flex flex-col items-center'>
             
-            <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl'>
-              <p className='font-bold text-slate-500'>Rejected</p>
-              <UserRoundX className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
+            <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl items-center'>
+              <p className='font-bold text-slate-500 5xl:text-3xl'>Rejected</p>
+              <UserRoundX className='text-slate-500 bg-slate-100 px-[4px] rounded-xl 5xl:w-12 5xl:h-12'/>
             </div>
 
             <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-full mt-2 ${applications.filter((app)=> app.status === 'rejected').length == 0? '' : ''}`}>
               { applications.filter((app)=> app.status === 'rejected').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
-                  <p>No Job Application posted here</p>
+                  <p className='5xl:text-2xl'>No Job Application posted here</p>
                 </div>}
 
               <ul>{categorizeApps_column('rejected', searchTerm)}</ul>
@@ -234,14 +234,14 @@ function App() {
           
           <div className='flex flex-col items-center'>
             
-            <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl'>
-              <p className='font-bold text-slate-500'>Offer</p>
-              <MessageSquareCheck className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
+            <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl items-center'>
+              <p className='font-bold text-slate-500 5xl:text-3xl'>Offer</p>
+              <MessageSquareCheck className='text-slate-500 bg-slate-100 px-[4px] rounded-xl 5xl:w-12 5xl:h-12'/>
             </div>
 
             <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-full mt-2 ${applications.filter((app)=> app.status === 'offer').length == 0? '' : ''}`}>
               { applications.filter((app)=> app.status === 'offer').length == 0 && <div className='text-slate-600 flex justify-center items-center'>
-                  <p>No Job Application posted here</p>
+                  <p className='5xl:text-2xl'>No Job Application posted here</p>
                 </div>}
 
               <ul>{categorizeApps_column('offer', searchTerm)}</ul>
@@ -269,12 +269,12 @@ function App() {
                 
                 <>
 
-                  <div className='fixed grid inset-0 z-10 w-64 mobileM:w-80 md:w-160 lg:w-200 justify-self-center self-center rounded-xl  h-fit bg-slate-200 p-8'>
+                  <div className='fixed grid inset-0 z-10 w-64 mobileM:w-80 md:w-160 lg:w-200 5xl:w-500 justify-self-center self-center rounded-xl  h-fit bg-slate-200 p-8'>
 
                     <div className='grid grid-cols-2 pb-2 mb-4 items-center border-b-2 border-indigo-500'>              
                       <div className='flex col-start-1 col-span-2 ml-auto items-center'>
                         <input
-                          className='mr-2 text-xl px-4 py-2 bg-white rounded-xl cursor-pointer' 
+                          className='mr-2 text-xl 5xl:text-3xl px-4 py-2 bg-white rounded-xl cursor-pointer' 
                           type="button" 
                           value="Cancel" 
                           onClick={() => {
@@ -288,7 +288,7 @@ function App() {
                         />
 
                         <input
-                          className='text-xl text-white py-2 bg-indigo-500 rounded-xl px-4 cursor-pointer' 
+                          className='text-xl 5xl:text-3xl text-white py-2 bg-indigo-500 rounded-xl px-4 cursor-pointer' 
                           type="button" 
                           value="Save" 
                           onClick={() => {
@@ -307,21 +307,21 @@ function App() {
                     
                     <div className='grid grid-cols-2'>
                       <div className='col-start-1'>
-                      <label className='text-xs md:text-lg pb-2 mr-2 cursor-pointer' htmlFor="company_name">Company Name</label>
+                      <label className='text-xs md:text-lg 5xl:text-3xl pb-2 mr-2 cursor-pointer' htmlFor="company_name">Company Name</label>
                       <input
                         type='text'
                         id='company_name'
-                        className='flex mb-2 text-base rounded-xl p-2 border-2 border-slate-300 mr-2 w-full focus:border-indigo-500 focus:outline-none' 
+                        className='flex mb-2 text-base 5xl:text-2xl  rounded-xl p-2 border-2 border-slate-300 mr-2 w-full focus:border-indigo-500 focus:outline-none' 
                         value={editingDraft?. company_name ?? ''}
                         onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
                       />
                       </div>
                       
                       <div className='ml-4 col-start-2'>
-                      <label className='text-xs md:text-lg pb-2 mr-2 cursor-pointer' htmlFor="role_title">Role Title</label>
+                      <label className='text-xs 5xl:text-3xl md:text-lg pb-2 mr-2 cursor-pointer' htmlFor="role_title">Role Title</label>
                       <input
                         type='text'                    
-                        className='flex mb-2 text-base rounded-xl p-2 border-2 border-slate-300 w-full focus:border-indigo-500 focus:outline-none'
+                        className='flex mb-2 text-base 5xl:text-2xl rounded-xl p-2 border-2 border-slate-300 w-full focus:border-indigo-500 focus:outline-none'
                         id='role_title' 
                         value={editingDraft?. role_title ?? ''}
                         onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
@@ -329,9 +329,9 @@ function App() {
                       </div>
 
                       <div className='col-start-1 col-span-2'>
-                        <label htmlFor="link" className='md:text-lg'>Link</label>
+                        <label htmlFor="link" className='md:text-lg 5xl:text-3xl'>Link</label>
                         <input
-                        className='flex p-2 text-base border-2 border-slate-300 focus:outline-none focus:border-indigo-500 rounded-xl w-full' 
+                        className='flex p-2 5xl:text-2xl text-base border-2 border-slate-300 focus:outline-none focus:border-indigo-500 rounded-xl w-full' 
                         type="text"
                         id='link'
                         value={editingDraft?. link ?? ''}
@@ -342,11 +342,11 @@ function App() {
                     </div>
 
                     <div className=''>
-                      <label className='cursor-pointer md:text-lg' htmlFor="notes">Details</label>
+                      <label className='cursor-pointer md:text-lg 5xl:text-3xl' htmlFor="notes">Details</label>
                       <textarea 
                       onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}   
                       id='notes' 
-                      className='flex resize-none self-start w-full h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>
+                      className='flex resize-none self-start w-full 5xl:text-2xl h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>
                                                            
                         {editingDraft?. notes ?? ''}
                           
@@ -364,16 +364,16 @@ function App() {
                 
                 <>
                 
-                  <div className={`grid grid-cols-3 rounded-xl p-2 mb-4 bg-white w-64 md:w-full transition-[opacity,visibility] duration-200`}>                    
+                  <div className={`grid grid-cols-3 5xl:gap-[4px] rounded-xl p-2 mb-4 bg-white w-64 md:w-full transition-[opacity,visibility] duration-200`}>                    
                     <div title={filteredApp.company_name} className='col-start-1 col-span-2 cursor-default'>
-                      <p className='truncate'>{filteredApp.company_name}</p>
+                      <p className='truncate 5xl:text-3xl'>{filteredApp.company_name}</p>
                     </div>
-                    <div className='col-start-3 row-start-1 row-end-[-1] pr-auto'><Info onClick={() => {setIsACardOpen(true); setCheckingId(filteredApp.id); document.body.style.overflow = 'hidden'}} className='ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' /></div>
+                    <div className='col-start-3 row-start-1 5xl:row-span-2 row-end-[-1] pr-auto 5xl:relative 5xl:justify-items-end'><Info onClick={() => {setIsACardOpen(true); setCheckingId(filteredApp.id); document.body.style.overflow = 'hidden'}} className='5xl:absolute 5xl:w-10 5xl:h-10 5xl:rounded-full  ml-auto rounded-xl bg-indigo-500 text-white cursor-pointer' /></div>
                     <div className='col-start-1 col-span-2 text-lg font-bold cursor-default' title={filteredApp.role_title}>
-                      <p className='truncate'>{filteredApp.role_title}</p>
+                      <p className='truncate 5xl:text-3xl'>{filteredApp.role_title}</p>
                     </div>                                        
-                    <div className='col-start-1 col-span-2 text-slate-500 text-xs pointer-events-none'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
-                    <div className='md:max-lg:flex md:max-lg:flex-col lg:flex lg:col-span-3 col-start-1 col-span-2 text-xs my-2 text-slate-500 max-md:items-center'>
+                    <div className='col-start-1 col-span-2 text-slate-500 text-xs 5xl:text-xl pointer-events-none'>Applied {daysSinceApplied(filteredApp.applied_date)} days ago</div>
+                    <div className='5xl:text-2xl md:max-lg:flex md:max-lg:flex-col lg:flex lg:col-span-3 col-start-1 col-span-2 text-xs my-2 text-slate-500 max-md:items-center'>
                       <button className='mr-2 bg-slate-200 md:w-fit cursor-pointer md:max-lg:mb-2 p-2 rounded-xl hover:text-slate-700 transition-text duration-200' onClick={() => {
                         
                         const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
@@ -400,7 +400,7 @@ function App() {
                     </div>
 
                     <select 
-                    className='max-lg:mr-auto max-lg:col-start-3 md:max-lg::col-start-1 md:max-lg:col-span-2 lg:col-start-2 lg:col-span-2 lg:inline-fit lg:ml-auto text-sm text-slate-500 focus:outline-none w-full cursor-pointer hover:text-slate-700 transition-text duration-200'                   
+                    className='5xl:text-2xl max-lg:mr-auto max-lg:col-start-3 md:max-lg::col-start-1 md:max-lg:col-span-2 lg:col-start-2 lg:col-span-2 lg:inline-fit lg:ml-auto text-sm text-slate-500 focus:outline-none w-full cursor-pointer hover:text-slate-700 transition-text duration-200'                   
                     value={filteredApp.status}
                       onChange={(event) => {
 
@@ -416,15 +416,15 @@ function App() {
                   </div>
 
                   {/* Extra info card */}
-                  <div className={`fixed inset-0 left-0 justify-self-center self-center z-20 rounded-xl mobileS:max-md:mx-2 w-64 mobileM:w-80 md:w-150 3xl:w-250 h-fit bg-slate-200 p-2 flex flex-col overflow-y-auto info-card-scroll transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'shadow-xl/30 opacity-100 visible border-4 border-indigo-500 pointer-events-auto' : 'hidden'}`}>
+                  <div className={`fixed inset-0 left-0 justify-self-center self-center z-20 rounded-xl mobileS:max-md:mx-2 w-64 mobileM:w-80 md:w-150 3xl:w-250 5xl:w-500 h-fit bg-slate-200 p-2 flex flex-col overflow-y-auto info-card-scroll transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'shadow-xl/30 opacity-100 visible border-4 border-indigo-500 pointer-events-auto' : 'hidden'}`}>
                     <div className='flex'>                                        
-                      <button className='ml-auto mr-2 text-slate-500 cursor-pointer hover:text-slate-700 transition-text duration-300' onClick={() => {setCheckingId(null); setIsACardOpen(false); document.body.style.overflow = ''}}>✕</button>
+                      <button className='ml-auto mr-2 text-slate-500 5xl:text-4xl cursor-pointer hover:text-slate-700 transition-text duration-300' onClick={() => {setCheckingId(null); setIsACardOpen(false); document.body.style.overflow = ''}}>✕</button>
                     </div>
                     <div className='flex mb-2 items-center'>
 
-                      <p className='relative truncate text-4xl mr-4' title={filteredApp.role_title}>{filteredApp.role_title}</p>
+                      <p className='relative truncate text-4xl 5xl:text-6xl mr-4' title={filteredApp.role_title}>{filteredApp.role_title}</p>
                        
-                      <Link className={`flex w-fit text-slate-600 translate-y-[2px] cursor-pointer transition-text duration-300 hover:text-indigo-500 group ${filteredApp.status === 'applied'? 'opacity-100 visible' : 'hidden'}`}
+                      <Link className={`flex w-fit text-slate-600 5xl:w-14 5xl:h-14 translate-y-[2px] cursor-pointer transition-text duration-300 hover:text-indigo-500 group ${filteredApp.status === 'applied'? 'opacity-100 visible' : 'hidden'}`}
                       onClick={() => {
 
                         if (isValidUrl(filteredApp.link) === true) {
@@ -445,22 +445,22 @@ function App() {
                       
                       />
                       
-                      <Mail onClick={() => getGmailIdAndRedirect(filteredApp.id)} className={`translate-y-[3px] text-slate-600 cursor-pointer opacity-0 invisible transition-text duration-300 hover:text-indigo-500 ${filteredApp.status !== 'applied'? 'opacity-100 visible' : ''}`}/> 
+                      <Mail onClick={() => getGmailIdAndRedirect(filteredApp.id)} className={`5xl:w-12 5xl:h-12 translate-y-[3px] text-slate-600 cursor-pointer opacity-0 invisible transition-text duration-300 hover:text-indigo-500 ${filteredApp.status !== 'applied'? 'opacity-100 visible' : ''}`}/> 
 
                     </div>
                     <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2 gap-4'>
-                      <p className='text-2xl truncate' title={filteredApp.company_name}>{filteredApp.company_name}</p>
-                      <div className='flex gap-1 ml-auto translate-y-[2px] text-slate-500 pointer-events-none'>
+                      <p className='text-2xl 5xl:text-4xl truncate' title={filteredApp.company_name}>{filteredApp.company_name}</p>
+                      <div className='5xl:text-3xl flex gap-1 ml-auto translate-y-[2px] text-slate-500 pointer-events-none'>
                         <p>Status:</p>
                         <p>{filteredApp.status}</p>
                       </div>
                       
                     </div>
                     <div className='flex mt-2 mb-2 items-center'>
-                      <ReceiptText className='text-indigo-500'/>
-                      <p className='text-xl pointer-events-none'>Details</p>
+                      <ReceiptText className='text-indigo-500 5xl:w-12 5xl:h-12'/>
+                      <p className='text-xl 5xl:text-4xl pointer-events-none'>Details</p>
                     </div>
-                    <div className='flex-1  p-2 indent-6'>
+                    <div className='flex-1 5xl:text-3xl p-2 indent-6'>
                       {filteredApp.notes}
                     </div>                              
                   </div>
@@ -761,9 +761,9 @@ function App() {
     <>
       {/* header */}
       <div className='flex max-md:flex-col gap-4 relative items-center justify-between p-4 mb-10'>
-        <div className='flex flex-col items-center'>
-          <p className="text-3xl font-extrabold text-indigo-500 pointer-events-none">Search Sync</p>               
-          <p className='relative text-slate-500 pointer-events-none'>Sync Better, Track Smarter</p>
+        <div className='flex flex-col items-center 5xl:gap-2'>
+          <p className="text-3xl 5xl:text-6xl font-extrabold text-indigo-500 pointer-events-none">Search Sync</p>               
+          <p className='5xl:text-3xl relative text-slate-500 pointer-events-none'>Sync Better, Track Smarter</p>
         </div>
         {gmailProfile ? (
           <img 
@@ -776,7 +776,7 @@ function App() {
           : 
           (
             <div className='flex md:order-3 gap-x-2 p-2 items-center cursor-pointer rounded-xl max-lg:bg-slate-500 hover:max-lg:bg-slate-600 max-lg:transition-bg max-lg:duration-300' onClick={() => connectGmail()}>
-              <p className='text-slate-200 lg:text-lg lg:text-slate-700 lg:transition-text lg:duration-300 lg:hover:text-indigo-500'>Connect gmail</p>
+              <p className='text-slate-200 lg:text-lg lg:text-slate-700 lg:transition-text lg:duration-300 lg:hover:text-indigo-500 5xl:text-3xl'>Connect gmail</p>
               <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
               className=' w-10 h-10 bg-slate-400 rounded-xl p-[4px] fill-slate-200 min-lg:hidden'>
                 <title>Gmail</title>
@@ -787,65 +787,65 @@ function App() {
         }
 
         <div className='relative'>        
-          <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2'/>
-          <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='rounded-full shadow-xl/10 p-2 pl-10 pr-6 inline-fit 3xl:inline-100 outline-none text-slate-500' placeholder='Search by company name'/>        
+          <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2 5xl:w-10 5xl:h-10'/>
+          <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='5xl:pl-15 5xl:inline-200 5xl:text-3xl rounded-full shadow-xl/10 p-2 pl-10 pr-6 inline-fit 3xl:inline-100 outline-none text-slate-500' placeholder='Search by company name'/>        
         </div>
         
         {/* Side panel button */}
         
-        <TextAlignJustify className='max-md:absolute md:order-4 md:max-lg:w-8 md:max-lg:h-8 right-0 md:-translate-y-[1.5px] -translate-x-2 translate-y-2 cursor-pointer text-slate-700 hover:text-slate-500 transition-text duration-300' onClick={() => setIsOpen(true)}/>
+        <TextAlignJustify className='5xl:w-12 5xl:h-12 max-md:absolute md:order-4 md:max-lg:w-8 md:max-lg:h-8 right-0 md:-translate-y-[1.5px] -translate-x-2 translate-y-2 cursor-pointer text-slate-700 hover:text-slate-500 transition-text duration-300' onClick={() => setIsOpen(true)}/>
         
       </div>
       
       {/* new job button */}
       <div className='max-lg:hidden'>
         <div onClick={() => {setIsACardOpen(true); setisNewJobFormHidden(false); document.body.style.overflow = 'hidden';}} 
-        className='cursor-pointer relative flex items-center group text-indigo-500 border-2 border-indigo-500 w-fit rounded-full p-2 ml-4 mb-4 transition-all duration-300 hover:bg-indigo-500 hover:text-white'
+        className='cursor-pointer relative flex items-center group text-indigo-500 border-2 5xl:border-4 border-indigo-500 w-fit rounded-full p-2 ml-4 mb-4 transition-all duration-300 hover:bg-indigo-500 hover:text-white'
         >
-          <Plus/>
-          <p>New Job</p>
+          <Plus className='5xl:w-12 5xl:h-12'/>
+          <p className='5xl:text-3xl 5xl:font-semibold'>New Job</p>
         </div>
       </div>
 
       {/* new job shortcut button  */}
       <div className='fixed z-4 left-4 bottom-4'>
         <div className='relative flex items-center group'>
-          <Plus onClick={() => {setIsACardOpen(true); setisNewJobFormHidden(false); document.body.style.overflow = 'hidden';}} className={`md:w-13 md:h-13 w-8 h-8 lg:w-10 lg:h-10 text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 md:w-12 md:h-12 ${isNewJobFormHidden? 'hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' : ''}`}/>
-          <div className={`absolute opacity-0 invisible pointer-events-none text-xs translate-x-8 md:text-base ml-2 bg-indigo-500 text-white text-nowrap px-[1.5px] md:px-[3px] md:translate-x-14 lg:translate-x-10 font-semibold ${isNewJobFormHidden? 'group-hover:opacity-100 visible transition-all duration-300' : ''}`}>Add job application</div>
+          <Plus onClick={() => {setIsACardOpen(true); setisNewJobFormHidden(false); document.body.style.overflow = 'hidden';}} className={`5xl:border-3 5xl:w-18 5xl:h-18 md:w-13 md:h-13 w-8 h-8 lg:w-10 lg:h-10 text-slate-500 cursor-pointer border-solid border rounded-full items-center outline-indigo-500 outline-2 md:w-12 md:h-12 ${isNewJobFormHidden? 'hover:bg-indigo-600 transition-colors duration-300 hover:text-white transition-text duration-300' : ''}`}/>
+          <div className={`5xl:text-3xl 5xl:translate-x-20 absolute opacity-0 invisible pointer-events-none text-xs translate-x-8 md:text-base ml-2 bg-indigo-500 text-white text-nowrap px-[1.5px] md:px-[3px] md:translate-x-14 lg:translate-x-10 font-semibold ${isNewJobFormHidden? 'group-hover:opacity-100 visible transition-all duration-300' : ''}`}>Add job application</div>
         </div>
       </div>
 
       {/* button for returning to top */}
       <div className={`fixed z-4 left-[16px] md:left-[18px] md:bottom-20 bottom-16 transition-[opacity,visibility] duration-300 ${showButton? 'opacity-100 visible pointer-events-auto': 'opacity-0 invisible pointer-events-none'}`}>  
         <div className='relative flex items-center group'>
-          <button className={`cursor-pointer rounded-xl md:w-12 md:h-12 w-8 h-8 lg:w-10 lg:h-10 lg:-translate-x-[2.5px] lg:translate-y-2 flex justify-center items-center text-indigo-500 border-solid border outline-indigo-500 outline-2 p-2 hover:bg-indigo-500 hover:text-white transition-all duration-300`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp className='md:scale-150 scale-140'/></button>
-          <div className='absolute opacity-0 invisible text-nowrap md:translate-x-14.5 md:text-base translate-x-10 lg:translate-y-2 lg:translate-x-12 text-xs pointer-events-none font-medium bg-indigo-500 text-white px-[1.5px] group-hover:opacity-100 visible transition-all duration-300'>Return to top</div>
+          <button className={`cursor-pointer rounded-xl 5xl:w-18 5xl:h-18 5xl:border-3 5xl:-translate-y-6 md:w-12 md:h-12 w-8 h-8 lg:w-10 lg:h-10 lg:-translate-x-[2.5px] lg:translate-y-2 flex justify-center items-center text-indigo-500 border-solid border outline-indigo-500 outline-2 p-2 hover:bg-indigo-500 hover:text-white transition-all duration-300`} onClick={() => window.scrollTo({top: 0, left: 0, behavior: 'smooth'})}><MoveUp className='5xl:scale-200 md:scale-150 scale-140'/></button>
+          <div className='absolute opacity-0 invisible text-nowrap 5xl:text-3xl 5xl:translate-x-21.5 5xl:-translate-y-6 md:translate-x-14.5 md:text-base translate-x-10 lg:translate-y-2 lg:translate-x-12 text-xs pointer-events-none font-medium bg-indigo-500 text-white px-[1.5px] group-hover:opacity-100 visible transition-all duration-300'>Return to top</div>
         </div>
       </div>  
 
       {/* side panel */}
-      <aside className={`fixed top-0 right-0 z-40 h-full w-8 md:w-15 bg-indigo-500 transition-transform duration-300 ease-out p-2 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
+      <aside className={`fixed top-0 right-0 z-40 h-full w-8 md:w-15 5xl:w-20 bg-indigo-500 transition-transform duration-300 ease-out p-2 ${isOpen? 'translate-x-0' : 'translate-x-full'}`}>
         
         <div className='p-2 flex mt-2 mb-10 h-10 relative items-center text-xl justify-center text-slate-400'>
-          <button className='relative cursor-pointer md:scale-124 md:translate-y-2 hover:text-slate-300 transition-colors duration-200' onClick={() => setIsOpen(false)}>✕</button>
+          <button className='relative cursor-pointer 5xl:scale-160 md:scale-124 md:translate-y-2 hover:text-slate-300 transition-colors duration-200' onClick={() => setIsOpen(false)}>✕</button>
         </div>
 
         <div className='flex flex-col text-white gap-4 md:gap-8 md:mt-20 justify-center'>
           <div className='relative self-center group'>
-            <button onClick={() => setView('column')} className='flex items-center cursor-pointer md:p-2 hover:bg-indigo-600 transition-colors duration-200 rounded-xl'><Columns2 className='scale-80 md:scale-120'/></button>
-            <div className='px-[1.5px] absolute -translate-y-5 md:-translate-y-[32px] md:-translate-x-[74px] -translate-x-[50px] text-xs md:text-base bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Column</div>
+            <button onClick={() => setView('column')} className='5xl:p-4  flex items-center cursor-pointer md:p-2 hover:bg-indigo-600 transition-colors duration-200 rounded-xl'><Columns2 className='scale-80 md:scale-120 5xl:scale-170'/></button>
+            <div className='5xl:text-xl 5xl:-translate-x-26 5xl:-translate-y-[45px] 5xl:-translate-x-[94px]  px-[1.5px] absolute -translate-y-5 md:-translate-y-[32px] md:-translate-x-[74px] -translate-x-[50px] text-xs md:text-base bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>Column</div>
           </div>
           <div className='relative self-center group'>
-            <button onClick={() => setView('list')} className='flex items-center cursor-pointer md:p-[6px] hover:bg-indigo-600 transition-colors duration-200 rounded-xl'><List className='scale-80 md:scale-110'/></button>
-            <div className='px-[1.5px] absolute -translate-y-5 md:-translate-y-[30px] md:-translate-x-[45px] -translate-x-[27px] text-xs md:text-base bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>List</div>
+            <button onClick={() => setView('list')} className='flex items-center cursor-pointer 5xl:p-[13px] md:p-[6px] hover:bg-indigo-600 transition-colors duration-200 rounded-xl'><List className='scale-80 md:scale-110 5xl:scale-160'/></button>
+            <div className='5xl:text-xl 5xl:-translate-y-[40px] 5xl:-translate-x-14 px-[1.5px] absolute -translate-y-5 md:-translate-y-[30px] md:-translate-x-[45px] -translate-x-[27px] text-xs md:text-base bg-black opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none'>List</div>
           </div>                    
         </div>
 
-        <div className='absolute bottom-4 right-[2px] md:-translate-x-[8px] flex flex-col gap-2 md:gap-6'>
+        <div className='absolute bottom-4 right-[2px] md:-translate-x-[8px] 5xl:-translate-x-[9px] flex flex-col gap-2 md:gap-6'>
           
           <div className='relative flex group bg-indigo-600 rounded-xl cursor-pointer hover:bg-indigo-400 transition-colors duration-300' onClick={() => sync()}>                    
-            <div className='px-[2px] absolute -translate-x-8.5 md:-translate-x-[52px] md:translate-y-[8px] translate-y-[4px] text-xs md:text-base bg-black text-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Sync</div>
-            <button className={`p-[1.5px] md:p-2 text-white cursor-pointer ${isSyncing? 'animate-spin [animation-direction:reverse]':''}`}><RotateCcw className='scale-80 md:scale-120'/></button>          
+            <div className='5xl:text-xl 5xl:translate-y-3.5 5xl:-translate-x-17 px-[2px] absolute -translate-x-8.5 md:-translate-x-[52px] md:translate-y-[8px] translate-y-[4px] text-xs md:text-base bg-black text-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Sync</div>
+            <button className={`p-[1.5px] md:p-2 5xl:p-4  text-white cursor-pointer ${isSyncing? 'animate-spin [animation-direction:reverse]':''}`}><RotateCcw className='scale-80 md:scale-120 5xl:scale-160'/></button>          
           </div>
           
           <div 
@@ -867,8 +867,8 @@ function App() {
                       
             }}>
 
-            <div className='p-[1.5px] -translate-x-10 md:-translate-x-[63px] md:translate-y-[4px] translate-y-[1px] absolute text-xs md:text-base bg-black text-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Logout</div>
-            <button className='md:p-2 cursor-pointer'><LogOut className='scale-80 md:scale-120'/></button>
+            <div className='5xl:text-xl 5xl:translate-y-3 5xl:-translate-x-21 p-[1.5px] -translate-x-10 md:-translate-x-[63px] md:translate-y-[4px] translate-y-[1px] absolute text-xs md:text-base bg-black text-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Logout</div>
+            <button className='md:p-2 5xl:py-4 cursor-pointer'><LogOut className='scale-80 md:scale-120 5xl:scale-160'/></button>
 
           </div>
         </div>
@@ -950,13 +950,13 @@ function App() {
           <Undo2 onClick={()=> {setFocusOn(''); setEditingId(null); setCheckingId(null); document.body.style.overflow = '';}} className={`text-slate-500 cursor-pointer`}/>
         </div>
 
-        { focusOn === 'applied' && <div className='flex flex-col flex-1'>
+        { focusOn === 'applied' && <div className='flex flex-col'>
           
           <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl'>
             <p className='font-bold text-slate-500'>Applied</p>
             <FileUser className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
           </div>
-          <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-fit mt-2 ${applications.filter((app)=> app.status === 'applied').length == 0? '' : ''}`}>
+          <div className={`relative bg-slate-300 rounded-xl p-2 flex flex-col w-fit mt-2 ${applications.filter((app)=> app.status === 'applied').length == 0? 'min-w-72 min-h-58' : ''}`}>
             { applications.filter((app)=> app.status === 'applied').length == 0 && <div className='text-slate-600 flex flex-1 justify-center items-center'>
                 <p>No Job Application posted here</p>
               </div>}
@@ -1070,7 +1070,7 @@ function App() {
           })
           .then((res) => res.json())
           .then((newApp) => setApplications((prev) => [...prev, newApp]))
-          .then(() => {resetForm()})
+          .then(() => {resetForm(); setIsACardOpen(false); document.body.style.overflow = '';})
 
           }}>
           
