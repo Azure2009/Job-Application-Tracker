@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Undo2, LogOut, MessageSquareCheck, UserRoundX, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser, MessagesSquare} from 'lucide-react'
+import { Undo2, Funnel, LogOut, MessageSquareCheck, UserRoundX, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser, MessagesSquare} from 'lucide-react'
 
 
 interface Application {
@@ -17,6 +17,10 @@ interface Application {
 // For toggling between column and list view
 
 type ViewType = 'column' | 'list'
+
+// For filter system
+
+type FilterType = 'applied' | 'interview' | 'rejected' | 'offer'
 
 function daysSinceApplied(d: string): number {
 
@@ -65,6 +69,10 @@ function App() {
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const [focusOn, setFocusOn] = useState<string>('');
+
+  const [filterBy, setFilterBy] = useState<FilterType | null>(null);
+
+  const [isMouseInside, setIsMouseInside] = useState<boolean>(false);
   
   // Show Button when scrolled far too down.
   useEffect(() => {
@@ -185,7 +193,7 @@ function App() {
 
         {view == 'column' && <div className='grid grid-cols-4 gap-4 mx-10'>
         
-          <div className='flex flex-col items-center'>
+          <div className={`flex flex-col items-center ${(filterBy === 'applied' || !filterBy? 'col-start-1' : 'hidden')}`}>
             
             <div className='flex gap-2 px-2 py-[2.5px] rounded-xl items-center'>
               <p className='font-bold text-slate-500 5xl:text-3xl'>Applied</p>
@@ -200,7 +208,7 @@ function App() {
             </div>
           </div>
           
-          <div className='flex flex-col items-center'>
+          <div className={`flex flex-col items-center ${(filterBy === 'interview' || !filterBy? 'col-start-2' : 'hidden')}`}>
             
             <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl items-center'>
               <p className='font-bold text-slate-500 5xl:text-3xl'>Interview</p>
@@ -216,7 +224,7 @@ function App() {
             </div>
           </div>
           
-          <div className='flex flex-col items-center'>
+          <div className={`flex flex-col items-center ${(filterBy === 'rejected' || !filterBy? 'col-start-3' : 'hidden')}`}>
             
             <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl items-center'>
               <p className='font-bold text-slate-500 5xl:text-3xl'>Rejected</p>
@@ -232,7 +240,7 @@ function App() {
             </div>
           </div>
           
-          <div className='flex flex-col items-center'>
+          <div className={`flex flex-col items-center ${(filterBy === 'offer' || !filterBy? 'col-start-4' : 'hidden')}`}>
             
             <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl items-center'>
               <p className='font-bold text-slate-500 5xl:text-3xl'>Offer</p>
@@ -494,41 +502,42 @@ function App() {
 
                     <div className='grid grid-cols-2 pb-2 mb-4 items-center border-b-2 border-indigo-500 '>
 
-                        <p title={filteredApp.role_title} className='cursor-default col-start-1 truncate font-bold'>{filteredApp.role_title}</p>
-                        <p title={filteredApp.company_name} className='cursor-default col-start-1 truncate'>{filteredApp.company_name}</p>
-                                    
-                        <div className='flex flex-col gap-2 col-start-2 row-start-1 row-span-2 items-center'>
-                          <input
-                            className=' text-md px-4 w-fit py-2 bg-white rounded-xl translate-x-[1px] cursor-pointer' 
-                            type="button" 
-                            value="Cancel" 
-                            onClick={() => {
+                      <p title={filteredApp.role_title} className='cursor-default col-start-1 truncate font-bold'>{filteredApp.role_title}</p>
+                      <p title={filteredApp.company_name} className='cursor-default col-start-1 truncate'>{filteredApp.company_name}</p>
+                                  
+                      <div className='flex flex-col gap-2 col-start-2 row-start-1 row-span-2 items-center'>
+                        <input
+                          className=' text-md px-4 w-fit py-2 bg-white rounded-xl translate-x-[1px] cursor-pointer' 
+                          type="button" 
+                          value="Cancel" 
+                          onClick={() => {
 
-                              document.body.style.overflow = '';
-                              setEditingId(null);
-                              setEditingDraft(null);
+                            document.body.style.overflow = '';
+                            setEditingId(null);
+                            setEditingDraft(null);
+                            setIsACardOpen(false);
+                            
+
+                          }}
+                        />
+
+                        <input
+                          className='text-md text-white py-2 bg-indigo-500 rounded-xl px-4 w-fit cursor-pointer' 
+                          type="button" 
+                          value="Save" 
+                          onClick={() => {
+
+                            if (editingId !== null) {
+
+                              saveEdit(editingId);
                               setIsACardOpen(false);
                               
+                            }
 
-                            }}
-                          />
+                          }}
+                        />
+                      </div>
 
-                          <input
-                            className='text-md text-white py-2 bg-indigo-500 rounded-xl px-4 w-fit cursor-pointer' 
-                            type="button" 
-                            value="Save" 
-                            onClick={() => {
-
-                              if (editingId !== null) {
-
-                                saveEdit(editingId);
-                                setIsACardOpen(false);
-                                
-                              }
-
-                            }}
-                          />
-                        </div>
                     </div>  
                     
                     <div className='grid grid-cols-2'>
@@ -585,10 +594,14 @@ function App() {
             
             <>
               
-              <div className='bg-slate-300 grid grid-cols-6 items-center px-2 py-2 rounded-xl'>
+              <div className='bg-slate-300 grid grid-cols-7 mb-4 gap-2 items-center px-2 py-2 rounded-xl'>
               
-                <div title={filteredApp.company_name} className='col-start-1 col-span-3'>
+                <div title={filteredApp.company_name} className='col-start-1 max-md:col-span-4 min-md:col-span-2 '>
                   <p className='text-slate-700 truncate pointer-events-none'>{filteredApp.company_name}</p>
+                </div>
+
+                <div className='max-md:hidden row-start-1 col-start-3 col-span-4 pointer-events-none truncate text-ellipsis'>
+                  <p >{filteredApp.role_title}</p>              
                 </div>
 
                 {/* Extra details info card */}
@@ -612,11 +625,9 @@ function App() {
                   </div>                              
                 </div>
 
-                {/* <div className='col-start-1 row-start-2 row-end-2 pointer-events-none truncate text-ellipsis'>
-                  <p >{filteredApp.role_title}</p>              
-                </div> */}
                 
-                <div className='col-start-4 col-span-5 row-start-1'>
+                
+                <div className='max-md:col-start-5 max-md:col-span-6 col-start-6 row-start-1'>
                   <select className='text-xs focus:outline-none cursor-pointer text-slate-700 hover:text-slate-900 transition-text duration-200' value={filteredApp.status} onChange={(event) => updateStatus(filteredApp.id, event.target.value)}>
 
                   <option value="applied">Applied</option>
@@ -626,7 +637,7 @@ function App() {
                   </select>
                 </div>
 
-                <div className='flex col-start-6 row-start-1 items-center justify-evenly'>
+                <div className='flex col-start-7 row-start-1 gap-2 items-center max-mobileM:translate-x-4 max-mobileM:translate-y-[1.5px] justify-evenly'>
 
                   <Trash2 onClick={() => {
                       
@@ -638,7 +649,7 @@ function App() {
 
                       }
 
-                      }} className='text-slate-700 w-4 h-4 cursor-pointer hover:text-slate-900 transition-bg duration-200'/>
+                      }} className='text-slate-700 mobileS:max-mobileM:scale-150 w-4 h-4 cursor-pointer hover:text-slate-900 transition-bg duration-200'/>
 
                   <SquarePen onClick={() => {
 
@@ -647,7 +658,7 @@ function App() {
                     setEditingDraft({...filteredApp});
                     setIsACardOpen(true);
 
-                  }} className='text-slate-700 w-4 h-4 cursor-pointer hover:text-slate-900 transition-bg duration-200'/>
+                  }} className='text-slate-700 mobileS:max-mobileM:scale-150 w-4 h-4 cursor-pointer hover:text-slate-900 transition-bg duration-200'/>
 
                 </div>
                       
@@ -786,9 +797,23 @@ function App() {
           )
         }
 
+        {/* Search bar */}
         <div className='relative'>        
           <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2 5xl:w-10 5xl:h-10'/>
           <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='5xl:pl-15 5xl:inline-200 5xl:text-3xl rounded-full shadow-xl/10 p-2 pl-10 pr-6 inline-fit 3xl:inline-100 outline-none text-slate-500' placeholder='Search by company name'/>        
+        </div>
+
+        {/* Filtering System */}
+        <div className={`${view === 'list'? '' : 'max-md:hidden'}`}>
+          <div className='relative grid w-full h-16' onMouseLeave={()=>setIsMouseInside(false)}>
+            <Funnel className='text-slate-500 justify-self-center' onMouseEnter={()=>setIsMouseInside(true)}/>
+            <div className={`absolute bottom-0 justify-self-center transition-all duration-200 flex bg-indigo-700 px-2 py-[4px] w-fit text-sm font-semibold text-white rounded-xl gap-x-2 ${isMouseInside? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              <button onClick={() => setFilterBy('applied')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Applied</button>  
+              <button onClick={() => setFilterBy('interview')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Interview</button>
+              <button onClick={() => setFilterBy('rejected')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Rejected</button>
+              <button onClick={() => setFilterBy('offer')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Offer</button>
+            </div>
+          </div>
         </div>
         
         {/* Side panel button */}
@@ -880,7 +905,6 @@ function App() {
       
       <div className={`flex justify-center min-md:hidden max-md:justify-evenly md:gap-36 ${(focusOn || view !== 'column')? 'hidden' : ''}`}>
         
-        {/* <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'applied'? 'hidden' : ''}`}>Applied</p> */}
         <div 
         onClick={() => {
 
@@ -893,9 +917,6 @@ function App() {
           <FileUser className='grid justify-self-center'/>
         </div>
         
-
-        
-        {/* <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'interview'? 'hidden' : ''}`}>Interview</p> */}
         <div 
         onClick={() => {
 
@@ -908,9 +929,6 @@ function App() {
           <MessagesSquare className='grid justify-self-center'/>
         </div>
         
-
-        
-        {/* <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'rejected'? 'hidden' : ''}`}>Rejected</p> */}
         <div 
         onClick={() => {
           
@@ -923,7 +941,6 @@ function App() {
           <UserRoundX className='grid justify-self-center'/>
         </div>
         
-        {/* <p className={`self-center font-semibold text-slate-500 ${focusOn !== 'offer'? 'hidden' : ''}`}>Offer</p> */}
         <div 
         onClick={() => {
 
@@ -1016,21 +1033,56 @@ function App() {
       </div>}
 
       {/* list style */}
-      {view == 'list' && <div className='flex flex-col items-center gap-2'>
-        <div>
-          <p>Applied</p>
-        </div>
-        <div>
-          <p>Interview</p>
-        </div>
-        <div>
-          <p>Rejected</p>
-        </div>
-        <div>
-          <p>Offer</p>
+      {view == 'list' && <div className='flex flex-col'> 
+        
+        
+        <button onClick={() => setFilterBy(null)} className={`cursor-pointer ml-2 mb-2 w-fit text-xs bg-red-500 font-semibold text-white px-[4px] rounded-xl ${filterBy? '' : 'hidden'}`}>Reset filter</button>
+        
+        <div className='flex flex-col items-center gap-2 mx-2 lg:mx-4'>
+          <div className={`flex flex-col w-full gap-2 ${(filterBy === 'applied' || !filterBy? '' : 'hidden')}`}>
+            <div className='flex gap-2'>
+              <p className='font-bold text-slate-500'>Applied</p>
+              <FileUser className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
+            </div>
+            { applications.filter((app)=> app.status === 'applied').length == 0 && <div className='text-slate-600 bg-slate-200 rounded-xl h-20 flex justify-center items-center'>
+              <p>No Job Application posted here</p>
+            </div>}
+            <ul>{categorizeApps_list('applied', searchTerm)}</ul>
+          </div>
+          <div className={`flex flex-col w-full gap-2 ${(filterBy === 'interview' || !filterBy? '' : 'hidden')}`}>
+            <div className='flex gap-2'>
+              <p className='grid justify-self-start font-bold text-slate-500'>Interview</p>
+              <MessagesSquare className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
+            </div>
+            { applications.filter((app)=> app.status === 'interview').length == 0 && <div className='text-slate-600 bg-slate-200 rounded-xl h-20 flex justify-center items-center'>
+              <p>No Job Application posted here</p>
+            </div>}
+            <ul>{categorizeApps_list('interview', searchTerm)}</ul>
+          </div>
+          <div className={`flex flex-col w-full gap-2 ${(filterBy === 'rejected' || !filterBy? '' : 'hidden')}`}>
+            <div className='flex gap-2'>
+              <p className='grid justify-self-start font-bold text-slate-500'>Rejected</p>
+              <UserRoundX className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
+            </div>
+            { applications.filter((app)=> app.status === 'rejected').length == 0 && <div className='text-slate-600 bg-slate-200 rounded-xl h-20 flex justify-center items-center'>
+              <p>No Job Application posted here</p>
+            </div>}
+            <ul>{categorizeApps_list('rejected', searchTerm)}</ul>
+          </div>
+          <div className={`flex flex-col w-full gap-2 ${(filterBy === 'offer' || !filterBy? '' : 'hidden')}`}>
+            <div className='flex gap-2'>
+              <p className='grid justify-self-start font-bold text-slate-500'>Offer</p>
+              <MessageSquareCheck className='text-slate-500 bg-slate-100 px-[4px] rounded-xl'/>
+            </div>
+            { applications.filter((app)=> app.status === 'offer').length == 0 && <div className='text-slate-600 bg-slate-200 rounded-xl h-20 flex justify-center items-center'>
+              <p>No Job Application posted here</p>
+            </div>}
+            <ul>{categorizeApps_list('offer', searchTerm)}</ul>
+          </div>
         </div>
       </div>}
 
+      {/* md screen sizes(only affects column view) */}
       {layout_md()}
       
       {/* Overlay a blackened screen when add application window is open */}
