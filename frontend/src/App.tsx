@@ -873,7 +873,7 @@ function App() {
         </div>
 
         {/* Filtering System for below 768px wide screen */}
-        <div className={`relative grid w-full h-16 ${(window.innerWidth < 768 && view === 'list'? '' : 'hidden')}`} onMouseLeave={()=>setIsMouseInside(false)}>
+        <div className={`relative grid w-full h-16 ${(view === 'list'? 'min-md:hidden' : 'hidden')}`} onMouseLeave={()=>setIsMouseInside(false)}>
           <Funnel className='text-slate-500 justify-self-center' onMouseEnter={()=>setIsMouseInside(true)}/>
           <div className={`absolute bottom-0 justify-self-center transition-all duration-200 flex bg-indigo-700 px-2 py-[4px] w-fit text-sm font-semibold text-white rounded-xl gap-x-2 ${isMouseInside? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             <button onClick={() => setFilterBy('applied')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Applied</button>  
@@ -901,7 +901,7 @@ function App() {
         </div>
         {/* Filtering System for 768px wide screen and above */}
 
-        <div className={`relative grid w-full min-lg:w-fit min-lg:h-fit h-16 ${window.innerWidth >= 768? '' : 'hidden'}`} onMouseLeave={()=>setIsMouseInside(false)}>
+        <div className={`relative grid w-full min-lg:w-fit min-lg:h-fit h-16 max-md:hidden`} onMouseLeave={()=>setIsMouseInside(false)}>
           <Funnel className='text-slate-500 justify-self-center min-lg:justify-self-start min-lg:pr-4 min-lg:w-fit min-lg:h-fit 5xl:w-16 5xl:h-16' onMouseEnter={()=>setIsMouseInside(true)}/>
           <div className={`absolute bottom-0 min-lg:translate-x-36 min-lg:translate-y-[2.5px] justify-self-center transition-all duration-200 flex bg-indigo-700 px-2 py-[4px] w-fit text-sm 5xl:text-xl 5xl:translate-x-50 5xl:-translate-y-3 font-semibold text-white rounded-xl gap-x-2 ${isMouseInside? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             <button onClick={() => setFilterBy('applied')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Applied</button>  
