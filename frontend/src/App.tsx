@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Undo2, Funnel, LogOut, MessageSquareCheck, UserRoundX, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser, MessagesSquare} from 'lucide-react'
+import { Undo2, Funnel, FunnelX, LogOut, MessageSquareCheck, UserRoundX, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser, MessagesSquare} from 'lucide-react'
 
 
 interface Application {
@@ -191,7 +191,7 @@ function App() {
 
       <div className='max-md:hidden'>
 
-        {view == 'column' && <div className='grid grid-cols-4 gap-4 mx-10'>
+        {view == 'column' && <div className='grid grid-cols-4 gap-4 mx-10 min-lg:mx-4'>
         
           <div className={`flex flex-col items-center ${(filterBy === 'applied' || !filterBy? 'col-start-1' : 'hidden')}`}>
             
@@ -223,7 +223,7 @@ function App() {
               <ul>{categorizeApps_column('interview', searchTerm)}</ul>
             </div>
           </div>
-          
+        
           <div className={`flex flex-col items-center ${(filterBy === 'rejected' || !filterBy? 'col-start-3' : 'hidden')}`}>
             
             <div className='flex gap-2 px-2 py-[2.5px] w-fit rounded-xl items-center'>
@@ -258,9 +258,58 @@ function App() {
 
         </div>}
 
+        {/* list style */}
+        {view == 'list' && <div className='flex flex-col mt-4'> 
+          
+          <div className='flex flex-col items-center gap-2 mx-2 lg:mx-4'>
+            <div className={`flex flex-col w-full gap-2 ${(filterBy === 'applied' || !filterBy? '' : 'hidden')}`}>
+              <div className='flex gap-2'>
+                <p className='font-bold text-slate-500 5xl:text-4xl'>Applied</p>
+                <FileUser className='text-slate-500 bg-slate-100 px-[4px] rounded-xl 5xl:w-10 5xl:h-10'/>
+              </div>
+              { applications.filter((app)=> app.status === 'applied').length == 0 && <div className='text-slate-600 bg-slate-200 rounded-xl h-20 flex justify-center items-center 5xl:text-3xl'>
+                <p>No Job Application posted here</p>
+              </div>}
+              <ul>{categorizeApps_list('applied', searchTerm)}</ul>
+            </div>
+
+            <div className={`flex flex-col w-full gap-2 ${(filterBy === 'interview' || !filterBy? '' : 'hidden')}`}>
+              <div className='flex gap-2'>
+                <p className='grid justify-self-start font-bold text-slate-500 5xl:text-4xl'>Interview</p>
+                <MessagesSquare className='text-slate-500 bg-slate-100 px-[4px] rounded-xl 5xl:w-10 5xl:h-10'/>
+              </div>
+              { applications.filter((app)=> app.status === 'interview').length == 0 && <div className='text-slate-600 bg-slate-200 rounded-xl h-20 flex justify-center items-center 5xl:text-3xl'>
+                <p>No Job Application posted here</p>
+              </div>}
+              <ul>{categorizeApps_list('interview', searchTerm)}</ul>
+            </div>
+
+            <div className={`flex flex-col w-full gap-2 ${(filterBy === 'rejected' || !filterBy? '' : 'hidden')}`}>
+              <div className='flex gap-2'>
+                <p className='grid justify-self-start font-bold text-slate-500 5xl:text-4xl'>Rejected</p>
+                <UserRoundX className='text-slate-500 bg-slate-100 px-[4px] rounded-xl 5xl:w-10 5xl:h-10'/>
+              </div>
+              { applications.filter((app)=> app.status === 'rejected').length == 0 && <div className='text-slate-600 bg-slate-200 rounded-xl h-20 flex justify-center items-center 5xl:text-3xl'>
+                <p>No Job Application posted here</p>
+              </div>}
+              <ul>{categorizeApps_list('rejected', searchTerm)}</ul>
+            </div>
+
+            <div className={`flex flex-col w-full gap-2 ${(filterBy === 'offer' || !filterBy? '' : 'hidden')}`}>
+              <div className='flex gap-2'>
+                <p className='grid justify-self-start font-bold text-slate-500 5xl:text-4xl'>Offer</p>
+                <MessageSquareCheck className='text-slate-500 bg-slate-100 px-[4px] rounded-xl 5xl:w-10 5xl:h-10'/>
+              </div>
+              { applications.filter((app)=> app.status === 'offer').length == 0 && <div className='text-slate-600 bg-slate-200 rounded-xl h-20 flex justify-center items-center 5xl:text-3xl'>
+                <p>No Job Application posted here</p>
+              </div>}
+              <ul>{categorizeApps_list('offer', searchTerm)}</ul>
+            </div>
+
+          </div>
+        </div>}
+
       </div>
-
-
     )
 
   }
@@ -500,171 +549,169 @@ function App() {
           
             <div className='fixed inset-0 rounded-xl bg-slate-200 p-8 min-w-64 z-10 h-fit top-20 mx-4'>
 
-                    <div className='grid grid-cols-2 pb-2 mb-4 items-center border-b-2 border-indigo-500 '>
+              <div className='grid grid-cols-2 pb-2 mb-4 items-center border-b-2 border-indigo-500'>
 
-                      <p title={filteredApp.role_title} className='cursor-default col-start-1 truncate font-bold'>{filteredApp.role_title}</p>
-                      <p title={filteredApp.company_name} className='cursor-default col-start-1 truncate'>{filteredApp.company_name}</p>
-                                  
-                      <div className='flex flex-col gap-2 col-start-2 row-start-1 row-span-2 items-center'>
-                        <input
-                          className=' text-md px-4 w-fit py-2 bg-white rounded-xl translate-x-[1px] cursor-pointer' 
-                          type="button" 
-                          value="Cancel" 
-                          onClick={() => {
-
-                            document.body.style.overflow = '';
-                            setEditingId(null);
-                            setEditingDraft(null);
-                            setIsACardOpen(false);
+                <p title={filteredApp.role_title} className='cursor-default col-start-1 truncate 5xl:text-5xl 5xl:pb-2 font-bold'>{filteredApp.role_title}</p>
+                <p title={filteredApp.company_name} className='cursor-default col-start-1 truncate 5xl:text-5xl'>{filteredApp.company_name}</p>
                             
+                <div className='ml-auto flex max-md:flex-col gap-2 col-start-2 row-start-1 row-span-2 items-center'>
+                  <input
+                    className='5xl:text-5xl  text-md px-4 w-fit py-2 bg-white rounded-xl translate-x-[1px] cursor-pointer' 
+                    type="button" 
+                    value="Cancel" 
+                    onClick={() => {
 
-                          }}
-                        />
-
-                        <input
-                          className='text-md text-white py-2 bg-indigo-500 rounded-xl px-4 w-fit cursor-pointer' 
-                          type="button" 
-                          value="Save" 
-                          onClick={() => {
-
-                            if (editingId !== null) {
-
-                              saveEdit(editingId);
-                              setIsACardOpen(false);
-                              
-                            }
-
-                          }}
-                        />
-                      </div>
-
-                    </div>  
-                    
-                    <div className='grid grid-cols-2'>
-                      <div className='col-start-1'>
-                      <label className='text-xs pb-2 mr-2 cursor-pointer' htmlFor="company_name">Company Name</label>
-                      <input
-                        type='text'
-                        id='company_name'
-                        className='flex mb-2 text-base rounded-xl p-2 border-2 border-slate-300 mr-2 w-full focus:border-indigo-500 focus:outline-none' 
-                        value={editingDraft?. company_name ?? ''}
-                        onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
-                      />
-                      </div>
+                      document.body.style.overflow = '';
+                      setEditingId(null);
+                      setEditingDraft(null);
+                      setIsACardOpen(false);
                       
-                      <div className='ml-4 col-start-2'>
-                      <label className='text-xs pb-2 mr-2 cursor-pointer' htmlFor="role_title">Role Title</label>
-                      <input
-                        type='text'                    
-                        className='flex mb-2 text-base rounded-xl p-2 border-2 border-slate-300 w-full focus:border-indigo-500 focus:outline-none'
-                        id='role_title' 
-                        value={editingDraft?. role_title ?? ''}
-                        onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
-                      />
-                      </div>
 
-                      <div className='col-start-1 col-span-2'>
-                        <label htmlFor="link">Link</label>
-                        <input
-                        className='flex p-2 text-base border-2 border-slate-300 focus:outline-none focus:border-indigo-500 rounded-xl w-full' 
-                        type="text"
-                        id='link'
-                        value={editingDraft?. link ?? ''}
-                        onChange={(event) => setEditingDraft({...editingDraft!, link : event.target.value})}
-                         />
-                      </div>
+                    }}
+                  />
 
-                    </div>
+                  <input
+                    className='5xl:text-5xl text-md text-white py-2 bg-indigo-500 rounded-xl px-4 w-fit cursor-pointer' 
+                    type="button" 
+                    value="Save" 
+                    onClick={() => {
 
-                    <div className=''>
-                      <label className='cursor-pointer' htmlFor="notes">Details</label>
-                      <textarea 
-                      onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}   
-                      id='notes' 
-                      className='flex resize-none self-start w-full h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>
-                                                           
-                        {editingDraft?. notes ?? ''}
-                          
-                      </textarea>
-                    </div>
+                      if (editingId !== null) {
 
-                  </div> 
+                        saveEdit(editingId);
+                        setIsACardOpen(false);
+                        
+                      }
+
+                    }}
+                  />
+                </div>
+
+              </div>  
+              
+              <div className='grid grid-cols-2'>
+                <div className='col-start-1'>
+                <label className='5xl:text-4xl text-xs pb-2 mr-2 cursor-pointer' htmlFor="company_name">Company Name</label>
+                <input
+                  type='text'
+                  id='company_name'
+                  className='flex mb-2 5xl:text-3xl text-base rounded-xl p-2 border-2 border-slate-300 mr-2 w-full focus:border-indigo-500 focus:outline-none' 
+                  value={editingDraft?. company_name ?? ''}
+                  onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
+                />
+                </div>
+                
+                <div className='ml-4 col-start-2'>
+                <label className='5xl:text-4xl text-xs pb-2 mr-2 cursor-pointer' htmlFor="role_title">Role Title</label>
+                <input
+                  type='text'                    
+                  className='flex mb-2 5xl:text-3xl text-base rounded-xl p-2 border-2 border-slate-300 w-full focus:border-indigo-500 focus:outline-none'
+                  id='role_title' 
+                  value={editingDraft?. role_title ?? ''}
+                  onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
+                />
+                </div>
+
+                <div className='col-start-1 col-span-2'>
+                  <label htmlFor="link" className='5xl:text-4xl'>Link</label>
+                  <input
+                  className='5xl:text-3xl flex p-2 text-base border-2 border-slate-300 focus:outline-none focus:border-indigo-500 rounded-xl w-full' 
+                  type="text"
+                  id='link'
+                  value={editingDraft?. link ?? ''}
+                  onChange={(event) => setEditingDraft({...editingDraft!, link : event.target.value})}
+                    />
+                </div>
+
+              </div>
+
+              <div className=''>
+                <label className='cursor-pointer 5xl:text-4xl' htmlFor="notes">Details</label>
+                <textarea 
+                onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}   
+                id='notes' 
+                className='5xl:text-3xl flex resize-none self-start w-full h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>
+                                                      
+                  {editingDraft?. notes ?? ''}
+                    
+                </textarea>
+              </div>
+
+            </div> 
             
             : 
             
-            <>
-              
-              <div className='bg-slate-300 grid grid-cols-7 mb-4 gap-2 items-center px-2 py-2 rounded-xl'>
-              
-                <div title={filteredApp.company_name} className='col-start-1 max-md:col-span-4 min-md:col-span-2 '>
-                  <p className='text-slate-700 truncate pointer-events-none'>{filteredApp.company_name}</p>
-                </div>
-
-                <div className='max-md:hidden row-start-1 col-start-3 col-span-4 pointer-events-none truncate text-ellipsis'>
-                  <p >{filteredApp.role_title}</p>              
-                </div>
-
-                {/* Extra details info card */}
-                <div className={`fixed z-20 w-2xl rounded-xl bg-slate-200 p-2 top-50 left-110 transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
-                  <div className='flex'>                                        
-                    <button className='ml-auto mr-2 text-slate-500 cursor-pointer' onClick={() => setCheckingId(null)}>✕</button>
-                  </div>
-                  <div className='flex mb-2 text-4xl items-center'>
-                    <p className='mr-4 pointer-events-none'>{filteredApp.role_title}</p>                                                            
-                  </div>
-                  <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2'>
-                    <p className='text-2xl pointer-events-none'>{filteredApp.company_name}</p>
-                    <p className='ml-auto text-slate-500 pointer-events-none'>Status: {status}</p>
-                  </div>
-                  <div className='flex mt-2 mb-2 items-center'>
-                    <ReceiptText className='text-indigo-500'/>
-                    <p className='text-xl pointer-events-none'>Details</p>
-                  </div>
-                  <div className='flex p-2 indent-6 pointer-events-none'>
-                    {filteredApp.notes}
-                  </div>                              
-                </div>
-
-                
-                
-                <div className='max-md:col-start-5 max-md:col-span-6 col-start-6 row-start-1'>
-                  <select className='text-xs focus:outline-none cursor-pointer text-slate-700 hover:text-slate-900 transition-text duration-200' value={filteredApp.status} onChange={(event) => updateStatus(filteredApp.id, event.target.value)}>
-
-                  <option value="applied">Applied</option>
-                  <option value="interview">Interview</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="offer">Offer</option>
-                  </select>
-                </div>
-
-                <div className='flex col-start-7 row-start-1 gap-2 items-center max-mobileM:translate-x-4 max-mobileM:translate-y-[1.5px] justify-evenly'>
-
-                  <Trash2 onClick={() => {
-                      
-                      const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
-                      
-                      if (deleteConfirmed) {
-
-                        deleteApplication(filteredApp.id);
-
-                      }
-
-                      }} className='text-slate-700 mobileS:max-mobileM:scale-150 w-4 h-4 cursor-pointer hover:text-slate-900 transition-bg duration-200'/>
-
-                  <SquarePen onClick={() => {
-
-                    document.body.style.overflow = 'hidden';
-                    setEditingId(filteredApp.id);
-                    setEditingDraft({...filteredApp});
-                    setIsACardOpen(true);
-
-                  }} className='text-slate-700 mobileS:max-mobileM:scale-150 w-4 h-4 cursor-pointer hover:text-slate-900 transition-bg duration-200'/>
-
-                </div>
-                      
+            <div className='bg-slate-300 grid grid-cols-7 mb-4 gap-2 items-center px-2 py-2 rounded-xl'>
+            
+              <div title={filteredApp.company_name} className='col-start-1 max-md:col-span-4 min-md:col-span-2 '>
+                <p className='text-slate-700 truncate pointer-events-none 5xl:text-3xl'>{filteredApp.company_name}</p>
               </div>
+
+              <div className='max-md:hidden row-start-1 col-start-3 col-span-4 pointer-events-none truncate text-ellipsis'>
+                <p className='5xl:text-3xl'>{filteredApp.role_title}</p>              
+              </div>
+
+              {/* Extra details info card */}
+              <div className={`fixed z-20 w-2xl rounded-xl bg-slate-200 p-2 top-50 left-110 transition-[opacity,visibility] duration-300 ${checkingId === filteredApp.id? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                <div className='flex'>                                        
+                  <button className='ml-auto mr-2 text-slate-500 cursor-pointer' onClick={() => setCheckingId(null)}>✕</button>
+                </div>
+                <div className='flex mb-2 text-4xl items-center'>
+                  <p className='mr-4 pointer-events-none'>{filteredApp.role_title}</p>                                                            
+                </div>
+                <div className='flex pb-2 items-center border-b-slate-400 border-b-2 mr-2'>
+                  <p className='text-2xl pointer-events-none'>{filteredApp.company_name}</p>
+                  <p className='ml-auto text-slate-500 pointer-events-none'>Status: {status}</p>
+                </div>
+                <div className='flex mt-2 mb-2 items-center'>
+                  <ReceiptText className='text-indigo-500'/>
+                  <p className='text-xl pointer-events-none'>Details</p>
+                </div>
+                <div className='flex p-2 indent-6 pointer-events-none'>
+                  {filteredApp.notes}
+                </div>                              
+              </div>
+
               
-            </>
+              
+              <div className='max-md:col-start-5 max-md:col-span-6 col-start-6 row-start-1'>
+                <select className='text-xs 5xl:text-3xl focus:outline-none cursor-pointer text-slate-700 hover:text-slate-900 transition-text duration-200' value={filteredApp.status} onChange={(event) => updateStatus(filteredApp.id, event.target.value)}>
+
+                <option value="applied">Applied</option>
+                <option value="interview">Interview</option>
+                <option value="rejected">Rejected</option>
+                <option value="offer">Offer</option>
+                </select>
+              </div>
+
+              <div className='flex col-start-7 row-start-1 gap-2 items-center max-mobileM:translate-x-4 max-mobileM:translate-y-[1.5px] justify-evenly'>
+
+                <Trash2 onClick={() => {
+                    
+                    const deleteConfirmed = confirm('Are you sure you want to delete the application? This cannot be undone.');
+                    
+                    if (deleteConfirmed) {
+
+                      deleteApplication(filteredApp.id);
+
+                    }
+
+                    }} className='text-slate-700 mobileS:max-mobileM:scale-150 5xl:w-10 5xl:h-10 w-4 h-4 cursor-pointer hover:text-slate-900 transition-bg duration-200'/>
+
+                <SquarePen onClick={() => {
+
+                  document.body.style.overflow = 'hidden';
+                  setEditingId(filteredApp.id);
+                  setEditingDraft({...filteredApp});
+                  setIsACardOpen(true);
+
+                }} className='text-slate-700 mobileS:max-mobileM:scale-150 5xl:w-10 5xl:h-10 w-4 h-4 cursor-pointer hover:text-slate-900 transition-bg duration-200'/>
+
+              </div>
+                    
+            </div>
+              
+            
           
           }
 
@@ -781,7 +828,7 @@ function App() {
             src={gmailProfile.profile_picture} 
             alt={gmailProfile.user_account}
             title={gmailProfile.user_account}
-            className='w-10 h-10 rounded-full absolute flex items-center left-2 top-4'
+            className='w-10 h-10 5xl:w-16 5xl:h-16 rounded-full absolute flex items-center right-30 lg:right-60 3xl:right-90 5xl:right-150 max-md:left-2 max-md:top-4'
           />
           ) 
           : 
@@ -803,33 +850,52 @@ function App() {
           <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='5xl:pl-15 5xl:inline-200 5xl:text-3xl rounded-full shadow-xl/10 p-2 pl-10 pr-6 inline-fit 3xl:inline-100 outline-none text-slate-500' placeholder='Search by company name'/>        
         </div>
 
-        {/* Filtering System */}
-        <div className={`${view === 'list'? '' : 'max-md:hidden'}`}>
-          <div className='relative grid w-full h-16' onMouseLeave={()=>setIsMouseInside(false)}>
-            <Funnel className='text-slate-500 justify-self-center' onMouseEnter={()=>setIsMouseInside(true)}/>
-            <div className={`absolute bottom-0 justify-self-center transition-all duration-200 flex bg-indigo-700 px-2 py-[4px] w-fit text-sm font-semibold text-white rounded-xl gap-x-2 ${isMouseInside? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <button onClick={() => setFilterBy('applied')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Applied</button>  
-              <button onClick={() => setFilterBy('interview')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Interview</button>
-              <button onClick={() => setFilterBy('rejected')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Rejected</button>
-              <button onClick={() => setFilterBy('offer')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Offer</button>
-            </div>
+        {/* Filtering System for below 768px wide screen */}
+        <div className={`relative grid w-full h-16 ${(window.innerWidth < 768 && view === 'list'? '' : 'hidden')}`} onMouseLeave={()=>setIsMouseInside(false)}>
+          <Funnel className='text-slate-500 justify-self-center' onMouseEnter={()=>setIsMouseInside(true)}/>
+          <div className={`absolute bottom-0 justify-self-center transition-all duration-200 flex bg-indigo-700 px-2 py-[4px] w-fit text-sm font-semibold text-white rounded-xl gap-x-2 ${isMouseInside? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <button onClick={() => setFilterBy('applied')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Applied</button>  
+            <button onClick={() => setFilterBy('interview')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Interview</button>
+            <button onClick={() => setFilterBy('rejected')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Rejected</button>
+            <button onClick={() => setFilterBy('offer')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Offer</button>
           </div>
         </div>
-        
+
         {/* Side panel button */}
         
         <TextAlignJustify className='5xl:w-12 5xl:h-12 max-md:absolute md:order-4 md:max-lg:w-8 md:max-lg:h-8 right-0 md:-translate-y-[1.5px] -translate-x-2 translate-y-2 cursor-pointer text-slate-700 hover:text-slate-500 transition-text duration-300' onClick={() => setIsOpen(true)}/>
         
       </div>
-      
-      {/* new job button */}
-      <div className='max-lg:hidden'>
-        <div onClick={() => {setIsACardOpen(true); setisNewJobFormHidden(false); document.body.style.overflow = 'hidden';}} 
-        className='cursor-pointer relative flex items-center group text-indigo-500 border-2 5xl:border-4 border-indigo-500 w-fit rounded-full p-2 ml-4 mb-4 transition-all duration-300 hover:bg-indigo-500 hover:text-white'
-        >
-          <Plus className='5xl:w-12 5xl:h-12'/>
-          <p className='5xl:text-3xl 5xl:font-semibold'>New Job</p>
+       
+      <div className='flex relative min-lg:items-center md:mb-6 min-lg:ml-4 min-lg:mr-10 gap-2'>
+        {/* new job button */}
+        <div className='max-lg:hidden'>
+          <div onClick={() => {setIsACardOpen(true); setisNewJobFormHidden(false); document.body.style.overflow = 'hidden';}} 
+          className='cursor-pointer relative flex items-center group text-indigo-500 border-2 5xl:border-4 border-indigo-500 w-fit rounded-full p-2 transition-all duration-300 hover:bg-indigo-500 hover:text-white'
+          >
+            <Plus className='5xl:w-12 5xl:h-12'/>
+            <p className='5xl:text-3xl 5xl:font-semibold'>New Job</p>
+          </div>
         </div>
+        {/* Filtering System for 768px wide screen and above */}
+
+        <div className={`relative grid w-full min-lg:w-fit min-lg:h-fit h-16 ${window.innerWidth >= 768? '' : 'hidden'}`} onMouseLeave={()=>setIsMouseInside(false)}>
+          <Funnel className='text-slate-500 justify-self-center min-lg:justify-self-start min-lg:pr-4 min-lg:w-fit min-lg:h-fit 5xl:w-16 5xl:h-16' onMouseEnter={()=>setIsMouseInside(true)}/>
+          <div className={`absolute bottom-0 min-lg:translate-x-36 min-lg:translate-y-[2.5px] justify-self-center transition-all duration-200 flex bg-indigo-700 px-2 py-[4px] w-fit text-sm 5xl:text-xl 5xl:translate-x-50 5xl:-translate-y-3 font-semibold text-white rounded-xl gap-x-2 ${isMouseInside? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <button onClick={() => setFilterBy('applied')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Applied</button>  
+            <button onClick={() => setFilterBy('interview')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Interview</button>
+            <button onClick={() => setFilterBy('rejected')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Rejected</button>
+            <button onClick={() => setFilterBy('offer')} className='cursor-pointer transition-bg duration-200 hover:bg-indigo-500 rounded-xl px-[3px]'>Offer</button>
+          </div>
+          <div className={`absolute translate-x-98 5xl:translate-x-10 -translate-y-4 min-lg:translate-x-4 min-lg:-translate-y-5 ${filterBy? '' : 'hidden'}`}>
+            <div className='relative flex group'>
+              <FunnelX onClick={() => setFilterBy(null)} className='cursor-pointer w-fit scale-70 5xl:scale-120 text-red-500 font-semibold'/>
+              <div className='absolute pointer-events-none translate-x-6 5xl:translate-x-8 bg-black px-[1.5px] opacity-0 invisible text-white text-xs 5xl:text-lg text-nowrap transition-all duration-500 group-hover:opacity-100 visible'>Reset filter</div>
+            </div>
+          </div>
+          
+        </div>
+        
       </div>
 
       {/* new job shortcut button  */}
@@ -1033,7 +1099,7 @@ function App() {
       </div>}
 
       {/* list style */}
-      {view == 'list' && <div className='flex flex-col'> 
+      {view == 'list' && <div className='flex flex-col min-md:hidden'> 
         
         
         <button onClick={() => setFilterBy(null)} className={`cursor-pointer ml-2 mb-2 w-fit text-xs bg-red-500 font-semibold text-white px-[4px] rounded-xl ${filterBy? '' : 'hidden'}`}>Reset filter</button>
@@ -1082,7 +1148,7 @@ function App() {
         </div>
       </div>}
 
-      {/* md screen sizes(only affects column view) */}
+      {/* md screen sizes*/}
       {layout_md()}
       
       {/* Overlay a blackened screen when add application window is open */}
