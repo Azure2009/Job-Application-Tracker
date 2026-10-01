@@ -828,12 +828,12 @@ function App() {
             src={gmailProfile.profile_picture} 
             alt={gmailProfile.user_account}
             title={gmailProfile.user_account}
-            className='w-10 h-10 5xl:w-16 5xl:h-16 rounded-full absolute flex items-center right-30 lg:right-60 3xl:right-90 5xl:right-150 max-md:left-2 max-md:top-4'
+            className='w-10 h-10 5xl:w-16 5xl:h-16 min-md:hidden rounded-full absolute flex items-center right-30 lg:right-60 3xl:right-90 5xl:right-150 max-md:left-2 max-md:top-4'
           />
           ) 
           : 
           (
-            <div className='flex md:order-3 gap-x-2 p-2 items-center cursor-pointer rounded-xl max-lg:bg-slate-500 hover:max-lg:bg-slate-600 max-lg:transition-bg max-lg:duration-300' onClick={() => connectGmail()}>
+            <div className='flex md:order-3 gap-x-2 p-2 items-center min-md:hidden cursor-pointer rounded-xl max-lg:bg-slate-500 hover:max-lg:bg-slate-600 max-lg:transition-bg max-lg:duration-300' onClick={() => connectGmail()}>
               <p className='text-slate-200 lg:text-lg lg:text-slate-700 lg:transition-text lg:duration-300 lg:hover:text-indigo-500 5xl:text-3xl'>Connect gmail</p>
               <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
               className=' w-10 h-10 bg-slate-400 rounded-xl p-[4px] fill-slate-200 min-lg:hidden'>
@@ -845,9 +845,31 @@ function App() {
         }
 
         {/* Search bar */}
-        <div className='relative'>        
+        <div className='relative flex items-center'>        
           <Search className='absolute text-slate-500 left-3 top-1/2 -translate-y-1/2 5xl:w-10 5xl:h-10'/>
-          <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='5xl:pl-15 5xl:inline-200 5xl:text-3xl rounded-full shadow-xl/10 p-2 pl-10 pr-6 inline-fit 3xl:inline-100 outline-none text-slate-500' placeholder='Search by company name'/>        
+          <input type="text" onChange={(event) => setSearchTerm(event.target.value)} className='5xl:pl-15 5xl:inline-200 5xl:text-3xl rounded-full shadow-xl/10 p-2 pl-10 pr-6 inline-fit 3xl:inline-100 outline-none text-slate-500' placeholder='Search by company name'/>
+          <div className='ml-[10px] max-md:hidden'>
+            {gmailProfile? (
+            <img 
+              src={gmailProfile.profile_picture} 
+              alt={gmailProfile.user_account}
+              title={gmailProfile.user_account}
+              className='w-10 h-10 5xl:w-16 5xl:h-16 rounded-full right-30 lg:right-60 3xl:right-90 5xl:right-150 max-md:left-2 max-md:top-4'
+            />
+            ) 
+            : 
+            (
+              <div className='flex md:order-3 gap-x-2 p-2 items-center cursor-pointer rounded-xl max-lg:bg-slate-500 hover:max-lg:bg-slate-600 max-lg:transition-bg max-lg:duration-300' onClick={() => connectGmail()}>
+                <p className='text-slate-200 lg:text-lg lg:text-slate-700 lg:transition-text lg:duration-300 lg:hover:text-indigo-500 5xl:text-3xl'>Connect gmail</p>
+                <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                className=' w-10 h-10 bg-slate-400 rounded-xl p-[4px] fill-slate-200 min-lg:hidden'>
+                  <title>Gmail</title>
+                  <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
+                </svg>
+              </div>
+            )
+            }
+          </div>        
         </div>
 
         {/* Filtering System for below 768px wide screen */}
