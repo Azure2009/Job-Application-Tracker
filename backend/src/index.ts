@@ -113,6 +113,11 @@ app.get('/', (req, res) => {
     res.send('Job Tracker API is running');
 });
 
+app.post('/register', (req, res) => {
+
+    
+
+});
 
 app.get('/applications', async (req, res) => {
 

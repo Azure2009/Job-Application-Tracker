@@ -1,4 +1,11 @@
+import {useState} from 'react'
+
 function RegisterPage() {
+
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     return (
 
@@ -16,25 +23,55 @@ function RegisterPage() {
                             <div className="flex flex-1 h-[2px] 5xl:mt-2 bg-indigo-500"></div>
                         </div>
 
-                        <form action="" className="flex flex-col gap-2">
+                        <form className="flex flex-col gap-2" onSubmit={async (event) => {
+
+                            event.preventDefault();
+
+                            fetch(`${import.meta.env.VITE_API_URL}/register`, {
+
+                                method: 'POST',
+                                headers: {
+
+                                    'Content-Type': 'application/json'
+
+                                },
+
+                                body: JSON.stringify({
+
+                                    fullName,
+                                    email,
+                                    password,
+                                    confirmPassword
+
+                                }
+
+                                )
+
+                            })
+
+                        }}>
                             <div>
                                 <label htmlFor="fullName">full name</label>
-                                <input id="fullName" type="text" placeholder="enter full name" autoComplete="off" required className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
+                                <input id="fullName" type="text" placeholder="enter full name" autoComplete="off" required value={fullName} onChange={(event) => {setFullName(event.target.value)}} 
+                                className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
                             </div>
 
                             <div>
                                 <label htmlFor="email">email</label>
-                                <input id="email" type="text" placeholder="enter email" autoComplete="off" required className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
+                                <input id="email" type="text" placeholder="enter email" autoComplete="off" required value={email} onChange={(event) => {setEmail(event.target.value)}} 
+                                className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
                             </div>
 
                             <div>
                                 <label htmlFor="password">password</label>
-                                <input id="password" type="password" placeholder="enter password" autoComplete="off" required className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
+                                <input id="password" type="password" placeholder="enter password" autoComplete="off" required value={password} onChange={(event) => {setPassword(event.target.value)}}
+                                className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
                             </div>
 
                             <div>
                                 <label htmlFor="confirmPassword">confirm password</label>
-                                <input id="confirmPassword" type="password" placeholder="retype password" autoComplete="off" required className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
+                                <input id="confirmPassword" type="password" placeholder="retype password" autoComplete="off" required value={confirmPassword} onChange={(event) => {setConfirmPassword(event.target.value)}} 
+                                className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
                             </div>
 
                             <button type="submit" 

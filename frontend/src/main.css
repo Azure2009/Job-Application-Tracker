@@ -20,12 +20,12 @@
 }
 
 .info-card-scroll::-webkit-scrollbar-thumb {
-  background-color: #6366f1; /* indigo-500, matches your accent color */
+  background-color: #6366f1; 
   border-radius: 9999px;
 }
 
 .info-card-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: #4f46e5; /* indigo-600 */
+  background-color: #4f46e5;
 }
 
 /* Firefox */
