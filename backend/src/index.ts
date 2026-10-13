@@ -1,3 +1,4 @@
+import argon2 from 'argon2';
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -99,23 +100,93 @@ function buildUpdateQuery (id: string, body: Partial<UpdatableApplicationFields>
 
 function classifyEmail(subject: string): string {
 
-        const lower = subject.toLowerCase();
+    const lower = subject.toLowerCase();
 
-        if (lower.includes('interview')) return 'interview';
-        if (lower.includes('offer')) return 'offer';
-        if (lower.includes('regret') || lower.includes('unfortunately') || lower.includes('not moving forward')) return 'rejected';
-        if (lower.includes('thank you for applying') || lower.includes('application received') || lower.includes('your application')) return 'applied';
-        return 'other';
+    if (lower.includes('interview')) return 'interview';
+    if (lower.includes('offer')) return 'offer';
+    if (lower.includes('regret') || lower.includes('unfortunately') || lower.includes('not moving forward')) return 'rejected';
+    if (lower.includes('thank you for applying') || lower.includes('application received') || lower.includes('your application')) return 'applied';
+    return 'other';
+
+}
+
+function normalizeEmail(email: string) {
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    return cleanEmail;
+
+}
+
+async function hashPassword(password: string) {
+    
+    try {
+        
+        const hash = await argon2.hash(password, {
+
+            type: argon2.argon2id,
+            memoryCost: 2 ** 16,
+            timeCost: 3,
+            parallelism: 4
+
+        });
+
+        return hash;
+
+    } catch (err) {
+
+        throw new Error('Password hashing failed');
 
     }
+
+}
 
 app.get('/', (req, res) => {
     res.send('Job Tracker API is running');
 });
 
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
 
-    
+    const { fullName, email, password, confirmPassword } = req.body;
+
+    const email_cleaned = normalizeEmail(email);
+
+    if (password !== confirmPassword) {
+
+        return res.status(400).json({
+
+            message: 'Passwords do not match.'
+
+        });
+
+    }
+
+    try {
+        
+        const password_hashed = await hashPassword(password);
+
+        await pool.query(
+
+            'INSERT INTO users(full_name, email, password_hash) VALUES ($1, $2, $3)',
+            [fullName, email_cleaned, password_hashed]
+
+        );
+
+        return res.status(201).json({
+                        
+            message: 'Registered successfully!'
+
+        });
+
+    } catch (error: unknown) {
+        
+        res.status(500).json({
+            
+            message: 'Passwords do not match'
+
+        });
+
+    }
 
 });
 

@@ -2,6 +2,8 @@ import {useState} from 'react'
 
 function RegisterPage() {
 
+    const [statusMessage, setStatusMessage] = useState('');
+
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -26,28 +28,52 @@ function RegisterPage() {
                         <form className="flex flex-col gap-2" onSubmit={async (event) => {
 
                             event.preventDefault();
+                            setStatusMessage(''); // Para ma rereset ang message everytime na mag submit.
 
-                            fetch(`${import.meta.env.VITE_API_URL}/register`, {
+                            try {
+                                
+                                const response = await fetch(`${import.meta.env.VITE_API_URL}/register`, {
 
-                                method: 'POST',
-                                headers: {
+                                    method: 'POST',
+                                    headers: {
 
-                                    'Content-Type': 'application/json'
+                                        'Content-Type': 'application/json'
 
-                                },
+                                    },
 
-                                body: JSON.stringify({
+                                    body: JSON.stringify({
 
-                                    fullName,
-                                    email,
-                                    password,
-                                    confirmPassword
+                                        fullName,
+                                        email,
+                                        password,
+                                        confirmPassword
+
+                                    })
+
+                                })
+
+                                const data = await response.json();
+
+                                if (!response.ok) {
+
+                                    setStatusMessage(data.message ?? 'Registration failed.');
+
+                                    return;
 
                                 }
 
-                                )
+                                setStatusMessage(data.message);
 
-                            })
+
+                            } catch {
+
+                                setStatusMessage('Unable to connect to the server. Please try again.')
+                            
+                            }
+
+                            
+
+                            
 
                         }}>
                             <div>
@@ -58,7 +84,7 @@ function RegisterPage() {
 
                             <div>
                                 <label htmlFor="email">email</label>
-                                <input id="email" type="text" placeholder="enter email" autoComplete="off" required value={email} onChange={(event) => {setEmail(event.target.value)}} 
+                                <input id="email" type="email" placeholder="enter email" autoComplete="off" required value={email} onChange={(event) => {setEmail(event.target.value)}} 
                                 className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
                             </div>
 
@@ -82,6 +108,8 @@ function RegisterPage() {
                             </button>
 
                         </form>
+
+                        <p role='status' className='text-red-500'> {statusMessage} </p>
 
                     </div>
 
