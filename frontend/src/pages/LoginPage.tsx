@@ -1,4 +1,11 @@
+import {useState} from 'react'
+
 function LoginPage() {
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const [statusMessage, setStatusMessage] = useState('')
 
     return (
 
@@ -16,16 +23,60 @@ function LoginPage() {
                             <div className="flex flex-1 h-[2px] 5xl:mt-2 bg-indigo-500"></div>
                         </div>
 
-                        <form action="" className="flex flex-col gap-2">
+                        <form className="flex flex-col gap-2" onSubmit={async (event) => {
+
+                            event.preventDefault();
+                            setStatusMessage('');
+
+                            try {
+                               
+                                const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
+
+                                    method: 'POST',
+                                    headers: {
+
+                                        'Content-Type': 'application/json'
+
+                                    },
+
+                                    body: JSON.stringify({
+
+                                        email,
+                                        password
+
+                                    })
+
+
+                                });
+
+                                const data = await response.json();
+
+                                if (!response.ok) {
+
+                                    setStatusMessage(data.message ?? 'Login failed.');
+                                    
+                                    return;
+
+                                };
+
+                                setStatusMessage(data.message);
+
+                            } catch {
+                            
+                                setStatusMessage('Something went wrong. Please try again.');
+
+                            }
+
+                        }}>
 
                             <div>
                                 <label htmlFor="email">email</label>
-                                <input name="email" type="text" placeholder="enter email" autoComplete="off" required className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
+                                <input id='email' name="email" type="email" placeholder="enter email" value={email} onChange={(event) => {setEmail(event.target.value)}} autoComplete="off" required className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
                             </div>
 
                             <div>
-                                <label htmlFor="fullName">password</label>
-                                <input name="fullName" type="password" placeholder="enter password" autoComplete="off" required className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
+                                <label htmlFor="password">password</label>
+                                <input id='password' name="password" type="password" placeholder="enter password" value={password} onChange={(event) => {setPassword(event.target.value)}} autoComplete="off" required className="px-2 py-[2px] w-full rounded-md border-2 border-slate-500 outline-none focus:border-2 focus:border-indigo-800"/>
                             </div>
 
                             <button type="submit" 
@@ -36,6 +87,8 @@ function LoginPage() {
                             </button>
 
                         </form>
+
+                        <p role='status' className='text-red-500'>{statusMessage}</p>
 
                     </div>
 

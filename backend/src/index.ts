@@ -141,6 +141,14 @@ async function hashPassword(password: string) {
 
 }
 
+async function verifyPassword(password_hashed:string ,password: string): Promise<boolean> {
+
+    const isValid = await argon2.verify(password_hashed, password)
+
+    return isValid;
+
+}
+
 app.get('/', (req, res) => {
     res.send('Job Tracker API is running');
 });
@@ -156,6 +164,16 @@ app.post('/register', async (req, res) => {
         return res.status(400).json({
 
             message: 'Passwords do not match.'
+
+        });
+
+    }
+
+    if (typeof password === 'string' && password.length < 8) {
+
+        return res.status(400).json({
+
+            message: 'Password must be at least 8 characters long.'
 
         });
 
@@ -179,14 +197,82 @@ app.post('/register', async (req, res) => {
         });
 
     } catch (error: unknown) {
-        
-        res.status(500).json({
+
+        if (typeof error === 'object' && error !==null) {
             
-            message: 'Passwords do not match'
+            if ('code' in error && 'constraint' in error) {
+
+                if (error.code === '23505' && error.constraint === 'users_email_key') {
+
+                    return res.status(409).json({
+
+                        message: 'An account is already associated with this email.'
+
+                    });
+
+                }
+
+            }
+
+        }
+
+    }
+
+});
+
+app.post('/login', async (req, res) => {
+
+    const {email, password} = req.body;
+
+    try {
+
+        const emailCleaned = email.trim().toLowerCase();
+        
+        const result = await pool.query(
+
+            'SELECT password_hash FROM users WHERE email = $1',
+            [emailCleaned]
+
+        )
+
+        if (result.rows.length === 0) {
+
+            return res.status(401).json({
+                
+                message: 'Invalid email or password.'
+
+            });
+
+        }
+
+        const password_hashed = result.rows[0].password_hash;
+
+        const isValid = await verifyPassword(password_hashed, password)
+
+        if (!isValid) {
+
+            return res.status(401).json({
+                
+                message: 'Invalid email or password.'
+            
+            });
+
+        }
+
+        res.status(200).json({
+
+            message: 'Password verified successfully.'
 
         });
 
+    } catch (error: unknown) {
+
+        console.error(error);
+        
+        return res.status(500).json('Something went wrong. Please try again.');
+
     }
+
 
 });
 
