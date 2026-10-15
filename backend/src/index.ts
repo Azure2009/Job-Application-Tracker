@@ -1,5 +1,8 @@
 import argon2 from 'argon2';
 import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { Pool } from 'pg';
@@ -8,11 +11,13 @@ import he from 'he';
 
 dotenv.config();
 
-const app = express();
-const PORT = 3000;
+const sessionSecret = process.env.SESSION_SECRET;
 
-app.use(express.json());
-app.use(cors());
+if (!sessionSecret) {
+
+    throw new Error('SESSION_SECRET was not set.')
+
+}
 
 const pool = new Pool({
 
@@ -24,6 +29,47 @@ const pool = new Pool({
     // }
 
 });
+
+const app = express();
+const PORT = 3000;
+
+const sessionStore = connectPgSimple(session);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(cors({
+
+    origin: process.env.FRONTEND_URL,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true
+
+}));
+
+app.use(session({
+
+    store: new sessionStore({
+
+        pool: pool,
+        tableName: 'sessions',
+        createTableIfMissing: true
+
+    }),
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 1000 * 60 * 60 * 24 
+
+    }
+
+}));
+
+app.set('trust proxy', 1);
 
 const oauth2Client = new google.auth.OAuth2(
 
@@ -141,13 +187,24 @@ async function hashPassword(password: string) {
 
 }
 
-async function verifyPassword(password_hashed:string ,password: string): Promise<boolean> {
+async function verifyPassword(password_hashed:string , password: string): Promise<boolean> {
 
     const isValid = await argon2.verify(password_hashed, password)
 
     return isValid;
 
 }
+
+function requiresAuth(req: Request, res: Response, next: NextFunction) {
+    
+    if (req.session.userId === undefined) {
+        return res.status(401).json({ message: 'Not authenticated.' });
+    }
+    next();
+
+}
+
+app.use(requiresAuth);
 
 app.get('/', (req, res) => {
     res.send('Job Tracker API is running');
@@ -216,6 +273,12 @@ app.post('/register', async (req, res) => {
 
         }
 
+        return res.status(500).json({
+
+            message: 'Something went wrong. Please try again.'
+
+        });
+
     }
 
 });
@@ -230,11 +293,12 @@ app.post('/login', async (req, res) => {
         
         const result = await pool.query(
 
-            'SELECT password_hash FROM users WHERE email = $1',
+            'SELECT id, password_hash FROM users WHERE email = $1',
             [emailCleaned]
 
         )
-
+        
+        // Kapag walang binalik si query
         if (result.rows.length === 0) {
 
             return res.status(401).json({
@@ -245,6 +309,7 @@ app.post('/login', async (req, res) => {
 
         }
 
+        // Kapag may binalik, get the password_hash from the first row then verify 
         const password_hashed = result.rows[0].password_hash;
 
         const isValid = await verifyPassword(password_hashed, password)
@@ -259,20 +324,74 @@ app.post('/login', async (req, res) => {
 
         }
 
-        res.status(200).json({
+        req.session.regenerate((err) => {
+            
+            if (err) {
 
-            message: 'Password verified successfully.'
+                return res.status(500).json({
 
+                    message: 'Something went wrong. Please try again.'
+
+                });
+            
+            }
+            
+            req.session.userId = result.rows[0].id;
+
+            req.session.save((err) => {
+                
+                if (err) {
+
+                    return res.status(500).json({
+
+                        message: 'Something went wrong. Please try again.'
+
+                    });
+                
+                }
+                
+                return res.status(200).json({
+
+                    message: 'Signed in successfully!'
+
+                })
+            
+            });
+        
         });
 
-    } catch (error: unknown) {
-
-        console.error(error);
         
-        return res.status(500).json('Something went wrong. Please try again.');
+
+    } catch (error: unknown) {
+        
+        return res.status(500).json({
+            
+            message: 'Something went wrong. Please try again.'
+        
+        });
 
     }
 
+});
+
+app.post('/logout', (req, res) => {
+
+    req.session.destroy((err) => {
+        
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Something went wrong.' });
+        }
+
+        res.clearCookie('connect.sid', {
+            path: '/',
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production'
+        });
+
+        res.status(200).json({ message: 'Logged out.' });
+    });
 
 });
 
@@ -516,7 +635,7 @@ app.get('/sync', async (req, res) => {
 
 });
 
-app.get('/logout', async (req, res) => {
+app.post('/gmail/disconnect', async (req, res) => {
 
     const result = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
 
