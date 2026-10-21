@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Undo2, Funnel, FunnelX, LogOut, MessageSquareCheck, UserRoundX, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser, MessagesSquare} from 'lucide-react'
-
+import { apiFetch } from './lib/api';
+import { Undo2, Funnel, FunnelX, Unplug, MessageSquareCheck, UserRoundX, SquarePen, Trash2, Mail, Link, ReceiptText, MoveUp, RotateCcw, Search, List, Plus, Columns2, TextAlignJustify, Info, FileUser, MessagesSquare} from 'lucide-react'
+import { Link as RouterLink } from 'react-router-dom';
 
 interface Application {
 
@@ -91,11 +92,27 @@ function App() {
   // Show gmail profile picture 
 
   useEffect(() => {
+    
+    async function loadGmailProfile() {
+      
+      try {
+      
+        const res = await apiFetch('/gmail-profile');
 
-    fetch(`${import.meta.env.VITE_API_URL}/gmail-profile`)
-    .then((res) => res.json())
-    .then((data) => setGmailProfile(data))
-    console.log('Profile:', gmailProfile)
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setGmailProfile(data)
+
+      } catch (err) {
+        
+        console.error("Setting gmail profile has failed:", err);
+
+      }
+
+    }
+
+    loadGmailProfile();
 
   }, []);
 
@@ -103,58 +120,83 @@ function App() {
 
   async function sync() {
 
-  setIsSyncing(true);
-  await fetch(`${import.meta.env.VITE_API_URL}/sync`)
-  .then(() => fetch(`${import.meta.env.VITE_API_URL}/applications`))
-  .then((res) => res.json())
-  .then((apps) => {
-    setApplications(apps);
-    setIsSyncing(false);
-  })
+    if (isSyncing) return;
+
+    setIsSyncing(true);
+
+    try {
+
+      const syncRes = await apiFetch('/sync');
+
+      if (!syncRes.ok) {
+
+        const err = await syncRes.json().catch(() => null);
+
+        console.error('Sync failed:', err?.error ?? syncRes.status);
+
+        return;
+
+      }
+
+      const appsRes = await apiFetch('/applications');
+      if (!appsRes.ok) return;
+
+      setApplications(await appsRes.json());
+
+    } catch (err) {
+
+      console.error('Sync failed:', err);
+
+    } finally {
+
+      setIsSyncing(false);
+
+    }
 
   }
 
-  async function logout() {
-
-    fetch(`${import.meta.env.VITE_API_URL}/logout`)
-    .then((res) => res.json())
-    .then((data) => {
-
-      console.log(data.message);
-      setGmailProfile(null);      
-      setApplications(data.applications);
-                  
-    })
+  async function disconnectGmail() {
     
+    try {
+
+      const res = await apiFetch('/gmail/disconnect', { method: 'POST' });
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      setGmailProfile(null);
+      setApplications(data.applications);
+
+    } catch (err) {
+
+      console.error('Failed to disconnect Gmail:', err);
+
+    }
   }
 
   async function getGmailIdAndRedirect(id: number) {
-    
-    console.log('getGmailIdAndRedirect called with id:', id);
-    await fetch(`${import.meta.env.VITE_API_URL}/gmailId/${id}`)
-    .then((res) => res.json())
-    .then((data) => {
 
-      if (data.refresh_token && data.gmail_message_id !== null) {
+    try {
+
+      const res = await apiFetch(`/gmailId/${id}`);
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      if (data.gmail_message_id) {
 
         window.location.href = `https://mail.google.com/mail/u/0/#all/${data.gmail_message_id}`;
 
       } else {
 
-        data.refresh_token? alert('No email found for this job application.') : alert('No gmail account is connected with job tracker.')
+        alert('No email found for this job application.');
 
       }
-            
-    })
+    } catch (err) {
 
+      console.error('Something went wrong:', err);
 
-  }
-
-  async function verifyRefreshToken(): Promise<boolean> {
-    
-   return fetch(`${import.meta.env.VITE_API_URL}/verify-refresh-token`)
-    .then((res) => res.json())
-    .then((data) => !!data.refresh_token);
+    }
 
   }
 
@@ -168,20 +210,42 @@ function App() {
 
   useEffect(() => {
 
-    fetch(`${import.meta.env.VITE_API_URL}/applications`)
-    .then((res) => res.json())
-    .then((data) => setApplications(data))
+    async function showApplications() {
+
+      try {
+        
+        const res = await apiFetch('/applications');
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setApplications(Array.isArray(data) ? data : []);
+
+      } catch (err) {
+        
+        console.error('Could not render applications:', err)
+
+      }
+
+    }
+
+    showApplications();
 
   }, []);
 
   function isValidUrl(link: string): boolean {
-  try {
-    const url = new URL(link);
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch {
-    return false;
+
+    try {
+
+      const url = new URL(link);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+
+    } catch {
+      
+      return false;
+
+    }
+
   }
-}
 
   function layout_md() {
 
@@ -369,8 +433,8 @@ function App() {
                         type='text'
                         id='company_name'
                         className='flex mb-2 text-base 5xl:text-2xl  rounded-xl p-2 border-2 border-slate-300 mr-2 w-full focus:border-indigo-500 focus:outline-none' 
-                        value={editingDraft?. company_name ?? ''}
-                        onChange={(event) => setEditingDraft({...editingDraft!, company_name : event.target.value})}  
+                        value={editingDraft?.company_name ?? ''}
+                        onChange={(event) => setEditingDraft({...editingDraft!, company_name: event.target.value})}  
                       />
                       </div>
                       
@@ -380,8 +444,8 @@ function App() {
                         type='text'                    
                         className='flex mb-2 text-base 5xl:text-2xl rounded-xl p-2 border-2 border-slate-300 w-full focus:border-indigo-500 focus:outline-none'
                         id='role_title' 
-                        value={editingDraft?. role_title ?? ''}
-                        onChange={(event) => setEditingDraft({...editingDraft!, role_title : event.target.value})}  
+                        value={editingDraft?.role_title ?? ''}
+                        onChange={(event) => setEditingDraft({...editingDraft!, role_title: event.target.value})}  
                       />
                       </div>
 
@@ -391,8 +455,8 @@ function App() {
                         className='flex p-2 5xl:text-2xl text-base border-2 border-slate-300 focus:outline-none focus:border-indigo-500 rounded-xl w-full' 
                         type="text"
                         id='link'
-                        value={editingDraft?. link ?? ''}
-                        onChange={(event) => setEditingDraft({...editingDraft!, link : event.target.value})}
+                        value={editingDraft?.link ?? ''}
+                        onChange={(event) => setEditingDraft({...editingDraft!, link: event.target.value})}
                          />
                       </div>
 
@@ -400,13 +464,11 @@ function App() {
 
                     <div className=''>
                       <label className='cursor-pointer md:text-lg 5xl:text-3xl' htmlFor="notes">Details</label>
-                      <textarea 
-                      onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}   
-                      id='notes' 
-                      className='flex resize-none self-start w-full 5xl:text-2xl h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>
-                                                           
-                        {editingDraft?. notes ?? ''}
-                          
+                      <textarea
+                      id='notes'
+                      value={editingDraft?.notes ?? ''}
+                      onChange={(event) => setEditingDraft({...editingDraft!, notes: event.target.value})}   
+                      className='flex resize-none self-start w-full 5xl:text-2xl h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>   
                       </textarea>
                     </div>
 
@@ -628,12 +690,10 @@ function App() {
               <div className=''>
                 <label className='cursor-pointer 5xl:text-4xl' htmlFor="notes">Details</label>
                 <textarea 
+                id='notes'
+                value={editingDraft?. notes ?? ''}
                 onChange={(event) => setEditingDraft({...editingDraft!, notes : event.target.value})}   
-                id='notes' 
-                className='5xl:text-3xl flex resize-none self-start w-full h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>
-                                                      
-                  {editingDraft?. notes ?? ''}
-                    
+                className='5xl:text-3xl flex resize-none self-start w-full h-30 p-2 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-indigo-500'>  
                 </textarea>
               </div>
 
@@ -735,83 +795,94 @@ function App() {
     setEditingDraft(null);
     setEditingId(null);
     setisNewJobFormHidden(true);
+    setCompanyName('');
+    setRoleTitle('');
+    setLink('');
+    setNotes('');
 
   }
 
-  async function deleteApplication (id: number) {
+  async function deleteApplication(id: number) {
 
-  fetch(`${import.meta.env.VITE_API_URL}/applications/${id}`, 
-    {
-      method: 'DELETE'
+    try {
 
-  })
-  .then(() => setApplications((prev) => prev.filter((app) => app.id !== id)))
-  
-}
+      const res = await apiFetch(`/applications/${id}`, { method: 'DELETE' });
 
-  async function updateStatus (id: number, status: string) {
+      if (!res.ok) {
+        alert('Could not delete the application.');
+        return;
+      }
 
-  fetch(`${import.meta.env.VITE_API_URL}/applications/${id}`, 
-    {
-      method: 'PATCH',
-      headers: {
+      setApplications((prev) => prev.filter((app) => app.id !== id));
 
-        'Content-Type': 'application/json'
+    } catch (err) {
 
-      },  
-      body: JSON.stringify({
+      console.error('Application deletion failed:', err);
 
-        status
+    }
+  }
 
-      })
-       
-  }).then((res) => res.json())
-    .then((updatedApp) => {
+  async function updateStatus(id: number, status: string) {
 
-      setApplications((prev) => prev.map((app) =>
+    try {
 
-        app.id === id? updatedApp : app 
+      const res = await apiFetch(`/applications/${id}`, {
 
-      ))
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
 
-    })
-  
-  
-}
+      });
+
+      if (!res.ok) return;
+
+      const updatedApp: Application = await res.json();
+      setApplications((prev) => prev.map((app) => (app.id === id ? updatedApp : app)));
+
+    } catch (err) {
+
+      console.error('There was an error updating status:', err);
+    
+    }
+  }
 
   async function saveEdit(id: number) {
 
-    fetch(`${import.meta.env.VITE_API_URL}/applications/${id}`, {
+    try {
 
-      method: 'PATCH',
-      headers: {
+      const res = await apiFetch(`/applications/${id}`, {
 
-        'Content-Type' : 'application/json'
+        method: 'PATCH',
+        headers: {
 
-      }, 
-      body: JSON.stringify({
+          'Content-Type' : 'application/json'
 
-        company_name : editingDraft?.company_name,
-        role_title : editingDraft?.role_title,
-        link : editingDraft?.link,
-        notes: editingDraft?.notes
+        },
 
-      })
+        body: JSON.stringify({
 
+          company_name : editingDraft?.company_name,
+          role_title : editingDraft?.role_title,
+          link : editingDraft?.link,
+          notes: editingDraft?.notes
 
-    })
-    .then((res) => res.json())
-    .then((updatedApp) => {
+        })
 
-      setApplications((prev) => prev.map((app) =>
+      });
 
-        app.id === id? updatedApp : app 
+      if (!res.ok) return;
 
-      ))
-      setEditingId(null)
-      setEditingDraft(null)
+      const updatedApp = await res.json();
 
-    })
+      setApplications((prev) => prev.map((app) => app.id === id? updatedApp : app));
+      setEditingId(null);
+      setEditingDraft(null);
+
+    } catch (err) {
+      
+      console.error('Something went wrong saving your edit,', err);
+      
+    }
 
   }
 
@@ -820,7 +891,12 @@ function App() {
       {/* header */}
       <div className='flex max-md:flex-col gap-4 relative items-center justify-between p-4 mb-10'>
         <div className='flex flex-col items-center 5xl:gap-2'>
-          <p className="text-3xl 5xl:text-6xl font-extrabold text-indigo-500 pointer-events-none">Search Sync</p>               
+          <RouterLink
+            to='/'
+            className='text-3xl 5xl:text-6xl font-extrabold text-indigo-500 hover:text-indigo-600 transition-colors duration-200'
+          >
+            Search Sync
+          </RouterLink>               
           <p className='5xl:text-3xl relative text-slate-500 pointer-events-none'>Sync Better, Track Smarter</p>
         </div>
         {gmailProfile ? (
@@ -961,29 +1037,25 @@ function App() {
             <button className={`p-[1.5px] md:p-2 5xl:p-4  text-white cursor-pointer ${isSyncing? 'animate-spin [animation-direction:reverse]':''}`}><RotateCcw className='scale-80 md:scale-120 5xl:scale-160'/></button>          
           </div>
           
-          <div 
-          className='flex justify-center group bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors duration-300 hover:text-white transition-text duration-300' 
-          onClick={async () => {
-
-            const isConnected = await verifyRefreshToken();
-
-            if (isConnected) {
-    
-              const userConfirmed = confirm('Are you sure you want to logout?'); 
-              if (userConfirmed) {logout()};
-
-            } else {
-
-              alert('No gmail account is connected to job tracker.')
-
+          <div
+          className='relative flex justify-center group bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors duration-300'
+          onClick={() => {
+            if (!gmailProfile) {
+              alert('No Gmail account is connected.');
+              return;
             }
-                      
-            }}>
 
-            <div className='5xl:text-xl 5xl:translate-y-3 5xl:-translate-x-21 p-[1.5px] -translate-x-10 md:-translate-x-[63px] md:translate-y-[4px] translate-y-[1px] absolute text-xs md:text-base bg-black text-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>Logout</div>
-            <button className='md:p-2 5xl:py-4 cursor-pointer'><LogOut className='scale-80 md:scale-120 5xl:scale-160'/></button>
-
-          </div>
+            const confirmed = confirm('Disconnect Gmail? Applications synced from Gmail will be removed.');
+            if (confirmed) disconnectGmail();
+          }}
+          >
+            <div className='5xl:text-xl absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap px-[3px] text-xs md:text-base md:-translate-x-2 bg-black text-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 pointer-events-none'>
+              Disconnect Gmail
+            </div>
+            <button className='md:p-2 5xl:py-4 cursor-pointer'>
+              <Unplug className='scale-80 md:scale-120 5xl:scale-160' />
+            </button>
+          </div>    
         </div>
         
       </aside>
@@ -1191,26 +1263,40 @@ function App() {
 
           event.preventDefault();
 
-          fetch(`${import.meta.env.VITE_API_URL}/applications`, {
-            method: 'POST', 
-            headers: {
+          try {
+            
+            const res = await apiFetch('/applications', {
 
-              'Content-Type': 'application/json'
+              method: 'POST', 
+              headers: {
 
-            },
-            body: JSON.stringify({
+                'Content-Type': 'application/json'
 
-              companyName,
-              roleTitle,
-              link,
-              notes
+              },
+              body: JSON.stringify({
 
-            })
-          
-          })
-          .then((res) => res.json())
-          .then((newApp) => setApplications((prev) => [...prev, newApp]))
-          .then(() => {resetForm(); setIsACardOpen(false); document.body.style.overflow = '';})
+                companyName,
+                roleTitle,
+                link,
+                notes
+
+              })
+
+            });
+
+            if (!res.ok) return;
+
+            const newApp = await res.json();
+
+            setApplications((prev) => [...prev, newApp]);
+            resetForm();
+            setIsACardOpen(false); document.body.style.overflow = '';
+
+          } catch (err) {
+            
+            console.error('There was a problem creating a new application', err);
+
+          }
 
           }}>
           

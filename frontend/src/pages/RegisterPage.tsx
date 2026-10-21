@@ -1,4 +1,6 @@
 import {useState} from 'react'
+import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../lib/api';
 
 function RegisterPage() {
 
@@ -8,6 +10,8 @@ function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+
+    const navigate = useNavigate();
 
     return (
 
@@ -32,48 +36,28 @@ function RegisterPage() {
 
                             try {
                                 
-                                const response = await fetch(`${import.meta.env.VITE_API_URL}/register`, {
+                                const response = await apiFetch('/register', {
 
                                     method: 'POST',
-                                    headers: {
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ fullName, email, password, confirmPassword })
 
-                                        'Content-Type': 'application/json'
-
-                                    },
-
-                                    body: JSON.stringify({
-
-                                        fullName,
-                                        email,
-                                        password,
-                                        confirmPassword
-
-                                    })
-
-                                })
+                                });
 
                                 const data = await response.json();
 
                                 if (!response.ok) {
-
                                     setStatusMessage(data.message ?? 'Registration failed.');
-
                                     return;
-
                                 }
 
-                                setStatusMessage(data.message);
-
+                                navigate('/login');
 
                             } catch {
 
                                 setStatusMessage('Unable to connect to the server. Please try again.')
                             
                             }
-
-                            
-
-                            
 
                         }}>
                             <div>

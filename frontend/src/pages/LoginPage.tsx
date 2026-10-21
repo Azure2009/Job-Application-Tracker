@@ -1,6 +1,12 @@
 import {useState} from 'react'
+import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../lib/api';
+import { useAuth } from '../auth/AuthContext';
 
 function LoginPage() {
+
+    const navigate = useNavigate();
+    const { refresh } = useAuth();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -30,22 +36,11 @@ function LoginPage() {
 
                             try {
                                
-                                const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
+                                const response = await apiFetch('/login', {
 
                                     method: 'POST',
-                                    headers: {
-
-                                        'Content-Type': 'application/json'
-
-                                    },
-
-                                    body: JSON.stringify({
-
-                                        email,
-                                        password
-
-                                    })
-
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email, password })
 
                                 });
 
@@ -54,12 +49,13 @@ function LoginPage() {
                                 if (!response.ok) {
 
                                     setStatusMessage(data.message ?? 'Login failed.');
-                                    
+
                                     return;
+                                }
 
-                                };
-
-                                setStatusMessage(data.message);
+                                await refresh();
+                                
+                                navigate('/dashboard');
 
                             } catch {
                             

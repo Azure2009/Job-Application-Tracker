@@ -1,5 +1,7 @@
 import argon2 from 'argon2';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
+import crypto from 'node:crypto';
 import type { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
@@ -10,6 +12,9 @@ import { google } from 'googleapis';
 import he from 'he';
 
 dotenv.config();
+
+const frontendUrl = process.env.FRONTEND_URL;
+if (!frontendUrl) throw new Error('FRONTEND_URL was not set.');
 
 const sessionSecret = process.env.SESSION_SECRET;
 
@@ -46,6 +51,8 @@ app.use(cors({
 
 }));
 
+app.set('trust proxy', 1);
+
 app.use(session({
 
     store: new sessionStore({
@@ -69,14 +76,16 @@ app.use(session({
 
 }));
 
-app.set('trust proxy', 1);
+function createOAuthClient() {
 
-const oauth2Client = new google.auth.OAuth2(
+   return new google.auth.OAuth2(
 
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
     process.env.GOOGLE_REDIRECT_URI
 );
+
+}
 
 interface UpdatableApplicationFields {
 
@@ -88,7 +97,7 @@ interface UpdatableApplicationFields {
 
 }
 
-function buildUpdateQuery (id: string, body: Partial<UpdatableApplicationFields>) {
+function buildUpdateQuery (id: string, userId: string | number, body: Partial<UpdatableApplicationFields>) {
 
     const fields = [];
 
@@ -134,12 +143,13 @@ function buildUpdateQuery (id: string, body: Partial<UpdatableApplicationFields>
     }
     
     values.push(id);
+    values.push(userId);
 
     const setClause = fields.join(', ');
 
-    const query = `UPDATE applications SET ${setClause} WHERE id = $${values.length} RETURNING *`;
+    const query = `UPDATE applications SET ${setClause} WHERE id = $${values.length - 1} AND user_id = $${values.length} RETURNING *`;
     
-    return {query, values, fields}
+    return {query, values, fields};
 
 
 }
@@ -204,15 +214,43 @@ function requiresAuth(req: Request, res: Response, next: NextFunction) {
 
 }
 
-app.use(requiresAuth);
-
 app.get('/', (req, res) => {
     res.send('Job Tracker API is running');
 });
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: 'Too many attempts. Please try again later.' }
+});
+
+app.use('/login', authLimiter);
+app.use('/register', authLimiter);
+
 app.post('/register', async (req, res) => {
 
     const { fullName, email, password, confirmPassword } = req.body;
+
+    if (
+
+        typeof fullName !== 'string' ||
+        typeof email !== 'string' ||
+        typeof password !== 'string' ||
+        typeof confirmPassword !== 'string'
+
+    ) {
+
+        return res.status(400).json({ message: 'Invalid request.' });
+
+    }
+
+    if (password.length < 8 || password.length > 128) {
+
+        return res.status(400).json({ message: 'Password must be between 8 and 128 characters.' });
+
+    }
 
     const email_cleaned = normalizeEmail(email);
 
@@ -286,6 +324,12 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
 
     const {email, password} = req.body;
+
+    if (typeof email !== 'string' || typeof password !== 'string') {
+
+        return res.status(400).json({ message: 'Invalid request.' });
+
+    }
 
     try {
 
@@ -363,6 +407,8 @@ app.post('/login', async (req, res) => {
         
 
     } catch (error: unknown) {
+
+        console.error(error);
         
         return res.status(500).json({
             
@@ -372,6 +418,35 @@ app.post('/login', async (req, res) => {
 
     }
 
+});
+
+app.use(requiresAuth); // Everything after this line, requires authentication.
+
+app.get('/me', async (req, res) => {
+
+    try {
+
+        const result = await pool.query(
+
+            'SELECT id, full_name, email FROM users WHERE id = $1',
+            [req.session.userId]
+
+        );
+
+        if (result.rows.length === 0) {
+
+            return res.status(401).json({ message: 'Not authenticated.' });
+
+        }
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+
+        console.error(error);
+        res.status(500).json({ message: 'Something went wrong.' });
+
+    }
 });
 
 app.post('/logout', (req, res) => {
@@ -397,7 +472,10 @@ app.post('/logout', (req, res) => {
 
 app.get('/applications', async (req, res) => {
 
-    const result = await pool.query('SELECT * FROM applications');
+    const result = await pool.query(
+        'SELECT * FROM applications WHERE user_id = $1',
+        [req.session.userId]
+    );
     res.json(result.rows);
 
 });
@@ -408,8 +486,8 @@ app.post('/applications', async (req, res) => {
 
     const result = await pool.query(
 
-        'INSERT INTO applications(company_name, role_title, link, notes) VALUES ($1, $2, $3, $4) RETURNING *',
-        [companyName==''? 'Unknown Company': companyName, roleTitle==''? 'Unknown Role': roleTitle, link==''? 'No link provided': link, notes==''?  'No notes provided': notes]
+        'INSERT INTO applications(user_id, company_name, role_title, link, notes) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [req.session.userId, companyName==''? 'Unknown Company': companyName, roleTitle==''? 'Unknown Role': roleTitle, link==''? 'No link provided': link, notes==''?  'No notes provided': notes]
 
     );
 
@@ -419,246 +497,311 @@ app.post('/applications', async (req, res) => {
 
 app.delete('/applications/:id', async (req, res) => {
 
-    const id = req.params.id
+    const result = await pool.query(
+        'DELETE FROM applications WHERE id = $1 AND user_id = $2',
+        [req.params.id, req.session.userId]
+    );
 
-    await pool.query('DELETE FROM applications WHERE id = $1', [id]);
+    if (!result.rowCount) {
+        return res.status(404).json({ message: 'Application not found.' });
+    }
 
-    res.status(204).send()
-
+    res.status(204).send();
 
 });
 
+const ALLOWED_STATUSES = ['applied', 'interview', 'offer', 'rejected'];
+
 app.patch('/applications/:id', async (req, res) => {
+
+    if ('status' in req.body && !ALLOWED_STATUSES.includes(req.body.status)) {
+        return res.status(400).json({ message: 'Invalid status.' });
+    }
     
-  const { query, values, fields} = buildUpdateQuery(req.params.id, req.body);
+    const { query, values, fields } = buildUpdateQuery(req.params.id, req.session.userId!, req.body);
 
-  if (fields.length === 0) {return res.status(400).json({ error: 'No fields updated.' })}
+    if (fields.length === 0) {
+        return res.status(400).json({ error: 'No fields updated.' });
+    }
 
-  const result = await pool.query(query, values);
-  res.json(result.rows[0]);
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Application not found.' });
+    }
+
+    res.json(result.rows[0])
+    
 });
 
 app.get('/auth/google', async (req, res) => {
 
-    const url = oauth2Client.generateAuthUrl({
-        access_type: 'offline', 
-        scope: [
-        'https://www.googleapis.com/auth/gmail.readonly',
-        'openid',
-        'email',
-        'profile'
-        ],
-        prompt: 'consent'
-    
+    const state = crypto.randomBytes(32).toString('hex');
+    req.session.oauthState = state;
+
+    req.session.save((err) => {
+
+        if (err) {
+
+            return res.status(500).json({ message: 'Something went wrong.' });
+
+        }
+
+        const url = createOAuthClient().generateAuthUrl({
+            access_type: 'offline',
+            scope: [
+                'https://www.googleapis.com/auth/gmail.readonly',
+                'openid',
+                'email',
+                'profile'
+            ],
+            prompt: 'consent',
+            state
+        });
+
+        res.redirect(url);
+
     });
 
-    res.redirect(url)
+});
 
+app.get('/auth/google/callback', async (req, res) => {
+
+    const { code, state } = req.query;
+
+    const expected = req.session.oauthState;
+    delete req.session.oauthState;
+
+    if (typeof code !== 'string' || typeof state !== 'string' || !expected || state !== expected) {
+        return res.status(400).send('Invalid OAuth request.');
+    }
+
+    try {
+
+        const client = createOAuthClient();
+        const { tokens } = await client.getToken(code);
+
+        if (!tokens.refresh_token || !tokens.id_token) {
+            return res.status(400).send('Google did not return the expected tokens - try disconnecting and reconnecting Gmail.');
+        }
+
+        const ticket = await client.verifyIdToken({
+            idToken: tokens.id_token,
+            audience: process.env.GOOGLE_CLIENT_ID!
+        });
+
+        const payload = ticket.getPayload();
+
+        if (!payload?.email) {
+            return res.status(400).send('No email received.');
+        }
+
+        await pool.query(
+            `INSERT INTO gmail_tokens (user_id, user_account, refresh_token, profile_picture) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO UPDATE SET user_account = EXCLUDED.user_account, refresh_token = EXCLUDED.refresh_token, profile_picture = EXCLUDED.profile_picture`,
+            [req.session.userId, payload.email, tokens.refresh_token, payload.picture]
+        );
+
+        res.redirect(`${frontendUrl}/dashboard`);
+
+    } catch (error) {
+
+        console.error(error);
+        res.status(500).send('Could not connect Gmail.');
+
+    }
 
 });
 
 app.get('/gmail-profile', async (req, res) => {
 
-    const result = await pool.query('SELECT user_account, profile_picture FROM gmail_tokens LIMIT 1');    
-    res.json(result.rows[0] ?? null);
-})
+    const result = await pool.query(
 
-app.get('/auth/google/callback', async (req, res) => {
+        'SELECT user_account, profile_picture FROM gmail_tokens WHERE user_id = $1',
+        [req.session.userId]
 
-    const code = req.query.code as string;
-
-    const { tokens } = await oauth2Client.getToken(code);
-
-    if (!tokens.refresh_token) {
-
-        res.status(400).send('No refresh token received - try disconnecting and reconnecting Gmail.');
-        return;
-
-    }
-
-    if (!tokens.id_token) {
-
-        res.status(400).send('No id token received.')
-        return;
-
-    }
-
-    oauth2Client.setCredentials(tokens);
-
-    const ticket = await oauth2Client.verifyIdToken({
-
-        idToken: tokens.id_token!,
-        audience: process.env.GOOGLE_CLIENT_ID!
-
-    });
-
-    const payload = ticket.getPayload();
-    
-    const email = payload?.email;
-    const picture = payload?.picture;
-
-    if (!email) {
-
-        res.status(400).send('No email received.')
-        return;
-
-    }
-
-    await pool.query('INSERT INTO gmail_tokens (user_account, refresh_token, profile_picture) VALUES ($1, $2, $3) ON CONFLICT (user_account) DO UPDATE SET refresh_token = EXCLUDED.refresh_token, profile_picture = EXCLUDED.profile_picture', 
-        [email, tokens.refresh_token, picture]
     );
 
-    res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173/');
-
-});
-
-app.get('/verify-refresh-token', async (req, res) => {
-
-    const result = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
-
-    const refresh_token = result.rows[0]?.refresh_token;
-
-    res.json({refresh_token: refresh_token});
+    res.json(result.rows[0] ?? null);
 
 })
 
 app.get('/gmailId/:id', async (req, res) => {
 
-    const primary_key = parseInt(req.params.id);
-    const result1 = await pool.query('SELECT gmail_message_id FROM applications WHERE id = $1', [primary_key]);
-    const result2 = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
-    
-    res.json({
-        
-        refresh_token : result2.rows[0]?.refresh_token,
-        gmail_message_id : result1.rows[0]?.gmail_message_id
-        
-    });
+    const result = await pool.query(
+
+        'SELECT gmail_message_id FROM applications WHERE id = $1 AND user_id = $2',
+        [req.params.id, req.session.userId]
+
+    );
+
+    if (result.rows.length === 0) {
+
+        return res.status(404).json({ message: 'Not found.' });
+
+    }
+
+    res.json({ gmail_message_id: result.rows[0].gmail_message_id });
 
 })
 
 app.get('/sync', async (req, res) => {
 
-    const result = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
-
-    const refresh_token = result.rows[0]?.refresh_token;
-
-    if (!refresh_token) {
-
-        console.log('No refresh token received.');
-        res.json({error: 'No Gmail account connected'});
-        return;
-
-    }
-
-    oauth2Client.setCredentials({refresh_token: refresh_token!});
-
-    // Start retrieving messages from user's gmail
-
-    const gmail = google.gmail({version:'v1', auth: oauth2Client});
-
-    const response = await gmail.users.messages.list({
-
-        userId: 'me',
-        q: 'subject:("Thank you for applying" OR interview OR "Your application" OR offer) after:2026/01/01 category:primary',
-        maxResults: 50
-
-    });
-
-    const messages = response.data.messages
-
-    if (!messages) {
-
-        res.json({message: 'No emails received.'})
-        return;
-
-    }
-
-    const emailDetails = await Promise.all(
+    try {
         
-        messages.map(async (msg) => {
+        const tokenResult = await pool.query(
 
-        const response = await gmail.users.messages.get({
+            'SELECT refresh_token FROM gmail_tokens WHERE user_id = $1',
+            [req.session.userId]
+            
+        );
+
+        const refresh_token = tokenResult.rows[0]?.refresh_token;
+
+        if (!refresh_token) {
+            return res.status(400).json({ error: 'No Gmail account connected' });
+        }
+
+        const client = createOAuthClient();
+        client.setCredentials({ refresh_token });
+
+        const gmail = google.gmail({ version: 'v1', auth: client });
+
+        const response = await gmail.users.messages.list({
 
             userId: 'me',
-            id: msg.id!,
-            format: 'metadata',
-            metadataHeaders: ['Subject', 'From', 'Date']
+            q: 'subject:("Thank you for applying" OR interview OR "Your application" OR offer) after:2026/01/01 category:primary',
+            maxResults: 50
 
-        })
+        });
 
-        const snippet = response.data.snippet ?? '';
+        const messages = response.data.messages
 
-        const headers = response.data.payload?.headers ?? [];
+        if (!messages) {
 
-        const subject = headers.find((h) => h.name === 'Subject')?.value ?? 'No Subject';
+            res.json({message: 'No emails received.'})
+            return;
 
-        const from = headers.find((h) => h.name === 'From')?.value ?? 'Unknown';
+        }
 
-        const date = headers.find((h) => h.name === 'Date')?.value ?? '';
+        const emailDetails = await Promise.all(
+            
+            messages.map(async (msg) => {
 
-        return {id: msg.id!, snippet, subject, from, date};
+            const response = await gmail.users.messages.get({
 
-    }))
+                userId: 'me',
+                id: msg.id!,
+                format: 'metadata',
+                metadataHeaders: ['Subject', 'From', 'Date']
 
-    await Promise.all(
+            })
 
-        emailDetails.map((email) => ({ // Create a new shape for the existing object.
+            const snippet = response.data.snippet ?? '';
 
-            ...email,
-            status: classifyEmail(email.subject),
-            company_name: email.from.split('<')[0]?.trim() ?? 'Unknown Company',
-            link: 'No link provided.',
-                        
+            const headers = response.data.payload?.headers ?? [];
+
+            const subject = headers.find((h) => h.name === 'Subject')?.value ?? 'No Subject';
+
+            const from = headers.find((h) => h.name === 'From')?.value ?? 'Unknown';
+
+            const date = headers.find((h) => h.name === 'Date')?.value ?? '';
+
+            return {id: msg.id!, snippet, subject, from, date};
+
         }))
-        .filter((email) => email.status !== 'other') // filter out emails with status value 'other'
-        .map(async (email) => { // wait for each new shaped object to be done being inserted in the applications table
 
-            await pool.query(`
-                    INSERT INTO applications(company_name, status, applied_date, notes, gmail_message_id, link) 
-                    VALUES ($1, $2, $3, $4, $5, $6)
-                    ON CONFLICT (gmail_message_id) DO NOTHING`, 
-                    [email.company_name, email.status, email.date? new Date(email.date): new Date(), he.decode(email.snippet), email.id, email.link]
+        await Promise.all(
+
+            emailDetails.map((email) => ({ // Create a new shape for the existing object.
+
+                ...email,
+                status: classifyEmail(email.subject),
+                company_name: email.from.split('<')[0]?.trim() ?? 'Unknown Company',
+                link: 'No link provided.',
+                            
+            }))
+            .filter((email) => email.status !== 'other') // filter out emails with status value 'other'
+            .map(async (email) => { // wait for each new shaped object to be done being inserted in the applications table
+
+                await pool.query(
+                    
+                `INSERT INTO applications(user_id, company_name, status, applied_date, notes, gmail_message_id, link)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                ON CONFLICT (user_id, gmail_message_id) DO NOTHING`,
+                [req.session.userId, email.company_name, email.status, email.date ? new Date(email.date) : new Date(), he.decode(email.snippet), email.id, email.link]
+
                 );
 
+            })
 
+        )
 
-        })
+        console.log('Messages found:', messages?.length);
 
+        res.json({message: 'Sync complete!'});
 
+    } catch (err) {
+        console.error('Sync failed:', err);
 
-    )
+        if (err instanceof Error && err.message.includes('invalid_grant')) {
 
-    console.log('Messages found:', messages?.length);
+            await pool.query('DELETE FROM gmail_tokens WHERE user_id = $1', [req.session.userId]);
+            return res.status(400).json({ error: 'Gmail access expired. Please reconnect.' });
 
-    res.json({message: 'Sync complete!'});
+        }
+
+        res.status(500).json({ error: 'Sync failed.' });
+    }
 
 });
 
 app.post('/gmail/disconnect', async (req, res) => {
 
-    const result = await pool.query('SELECT refresh_token FROM gmail_tokens LIMIT 1');
+    const result = await pool.query(
+
+        'SELECT refresh_token FROM gmail_tokens WHERE user_id = $1',
+        [req.session.userId]
+
+    );
 
     const refresh_token = result.rows[0]?.refresh_token;
 
     if (refresh_token) {
 
-        await oauth2Client.revokeToken(refresh_token);
+        try {
+            await createOAuthClient().revokeToken(refresh_token);
+        } catch (err) {
+            console.error('Token revoke failed:', err);
+        }
 
     }
-    
-    await pool.query('DELETE FROM gmail_tokens');
-    await pool.query('DELETE FROM applications WHERE gmail_message_id is NOT NULL');
 
-    const queryResult = await pool.query('SELECT * FROM applications');
+    await pool.query('DELETE FROM gmail_tokens WHERE user_id = $1', [req.session.userId]);
+    await pool.query(
 
-    res.json({
-    message: 'Logged out successfully',
-    applications: queryResult.rows            
+        'DELETE FROM applications WHERE user_id = $1 AND gmail_message_id IS NOT NULL',
+        [req.session.userId]
 
-    });
+    );
+
+    const queryResult = await pool.query(
+
+        'SELECT * FROM applications WHERE user_id = $1',
+        [req.session.userId]
+
+    );
+
+    res.json({ message: 'Gmail disconnected.', applications: queryResult.rows });
 
 })
+
+app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+
+    console.error(err);
+    if (res.headersSent) return next(err);
+    res.status(500).json({ message: 'Something went wrong.' });
+
+});
 
 app.listen(PORT, () => {
 
