@@ -116,6 +116,22 @@ function App() {
 
   }, []);
 
+
+  // For user experience
+  
+  useEffect(() => {
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('gmail') === 'already_connected') {
+
+      alert('That Gmail account is already linked to another SearchSync account.');
+      window.history.replaceState({}, '', '/dashboard');
+
+    }
+
+  }, []);
+
   // Sync with gmail
 
   async function sync() {

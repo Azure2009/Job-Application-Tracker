@@ -605,6 +605,12 @@ app.get('/auth/google/callback', async (req, res) => {
 
     } catch (error) {
 
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
+
+            return res.redirect(`${frontendUrl}/dashboard?gmail=already_connected`);
+            
+        }
+
         console.error(error);
         res.status(500).send('Could not connect Gmail.');
 
