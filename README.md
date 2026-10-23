@@ -33,7 +33,7 @@ cd ../frontend && npm install
  
 ```bash
 createdb job_tracker
-psql "postgresql://USER:PASSWORD@localhost:5432/job_tracker" -f schema.sql
+psql "postgresql://USER:PASSWORD@localhost:5432/job_tracker" -f backend/schema.sql
 ```
  
 The `sessions` table is created automatically the first time the server starts.
