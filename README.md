@@ -1,3 +1,6 @@
+# Live Demo
+https://search-sync.site
+
 # SearchSync
 
 A job application tracker where you can linked your gmail account using the GMAIL API. SearchSync reads your emails from your gmail account, filters them into 4 different categories (Applied/Interview/Rejected/Offer) based on certain keywords inside the emails. 
