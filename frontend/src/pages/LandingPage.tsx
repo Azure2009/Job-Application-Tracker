@@ -1,4 +1,6 @@
 import {Link} from 'react-router-dom';
+import DemoVideo from '../demoVideo';
+
 
 function LandingPage() {
 
@@ -7,28 +9,34 @@ function LandingPage() {
         <div className="min-h-screen pt-2">
             <p className="-translate-y-2 justify-self-center text-indigo-500 font-extrabold text-3xl mb-10 5xl:text-7xl">SearchSync</p>
 
-            <div className="flex flex-col gap-38 5xl:gap-100">
+            <div className="flex flex-col gap-60 5xl:gap-100">
                 
-                <div className="flex flex-col gap-2 bg-linear-to-br from-indigo-500 to-[#eef05f] text-black p-2 mx-[1px] md:rounded-lg md:gap-20">
-                    <p className="text-center font-semibold md:text-2xl 3xl:text-3xl 5xl:text-5xl">Connect your gmail to searchsync</p>
+                <div className="flex flex-col gap-6 bg-linear-to-br from-indigo-500 to-[#eef05f] text-black p-2 mx-[1px] md:rounded-lg md:gap-12 3xl:gap-11 5xl:gap-26">
+                    
+                    <p className="text-center font-semibold md:text-[22px] 3xl:text-[28px] 5xl:text-5xl">No more manual checking for job updates.</p>
 
-                    <video src={undefined} className='border'></video>
-                
-                    <p className="text-center font-bold md:text-[22px] 3xl:text-[28px] 5xl:text-5xl">no more manual checking for job updates.</p>
+                    <DemoVideo
+                        src='../public/videos/syncEmails_demo.mp4'
+                        poster='../public/posterImages/sync.jpg'
+                        label='categorize emails with just one button'
+                        className='self-center rounded-lg border-0 ring-3 min-md:ring-6 md:max-w-xl lg:max-w-2xl 5xl:max-w-7xl'
+                    />
 
-                </div>
+                    <p className="text-xl text-center font-bold text-indigo-500 md:text-[28px] lg:text-[30px] 3xl:text-4xl 5xl:text-6xl">One button: sync and categorize emails</p>
 
-                <div className="flex flex-col items-center gap-2">
-                    <video src={undefined} className='border'></video>
-                    <p className="text-xl font-bold text-indigo-500 lg:text-[22px] 3xl:text-4xl 5xl:text-6xl">One button, filters all</p>
+                    
+
                 </div>
 
                 <div className="flex flex-col bg-[#eef05f] px-2 py-20 gap-40 5xl:gap-80">
                     
                     <div className="grid grid-cols-2 justify-items-center items-center">
-                        
-                        <video src={undefined} className="border"></video>
-
+                        <DemoVideo
+                        src='../public/videos/changeStatus_demo.mp4'
+                        poster='../public/posterImages/changeStatus.jpg'
+                        label='Change job application status with ease'
+                        className='rounded-lg ring-2'
+                        />
                         <p className="text-center text-xl lg:text-2xl font-bold 3xl:text-4xl 5xl:text-6xl">Easy status change</p>    
                     </div>
 
@@ -108,9 +116,9 @@ function LandingPage() {
 
             </div>
 
-            <div className="max-md:grid max-md:grid-cols-2 min-md:flex min-md:justify-center min-md:gap-10 bg-indigo-500 h-20 5xl:h-30 w-full p-2 text-white 5xl:gap-20">
+            <div className="max-md:grid max-md:grid-cols-2 min-md:flex min-md:justify-center min-md:gap-10 bg-indigo-500 h-full w-full p-2 text-white 5xl:gap-20">
                 <div className="flex flex-col items-center 5xl:gap-2">
-                    <p className="text-[#eef05f] 5xl:text-3xl">Contacts</p>
+                    <p className="text-[#eef05f] 5xl:text-3xl">Platforms</p>
                     <div className='flex items-center gap-2'>
                         <a href="https://github.com/Azure2009" target='_blank' rel="noopener noreferrer">
                             <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" 
@@ -132,10 +140,15 @@ function LandingPage() {
                     </div>
                 </div>
                 
-                <div className="flex flex-col items-center md:max-5xl:-translate-y-[1px]">
+                <div className="flex flex-col items-center min-md:order-3 md:max-5xl:-translate-y-[1px]">
                     <p className="text-[#eef05f] 5xl:text-3xl">Portal</p>
                     <Link to='/register' className="text-xs 5xl:text-2xl hover:text-slate-300">Create account</Link>
                     <Link to='/login' className="text-xs 5xl:text-2xl hover:text-slate-300">Sign in</Link>
+                </div>
+
+                <div className='col-span-2 flex flex-col items-center'>
+                    <p className="text-[#eef05f] 5xl:text-3xl">My email</p>
+                    <p className="text-xs 5xl:text-2xl">carlo.dev.work@gmail.com</p>
                 </div>
                 
             </div>
