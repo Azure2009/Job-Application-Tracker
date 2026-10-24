@@ -16,8 +16,8 @@ function LandingPage() {
                     <p className="text-center font-semibold md:text-[22px] 3xl:text-[28px] 5xl:text-5xl">No more manual checking for job updates.</p>
 
                     <DemoVideo
-                        src='../public/videos/syncEmails_demo.mp4'
-                        poster='../public/posterImages/sync.jpg'
+                        src='/videos/syncEmails_demo.mp4'
+                        poster='/posterImages/sync.jpg'
                         label='categorize emails with just one button'
                         className='self-center rounded-lg border-0 ring-3 min-md:ring-6 md:max-w-xl lg:max-w-2xl 5xl:max-w-7xl'
                     />
@@ -32,8 +32,8 @@ function LandingPage() {
                     
                     <div className="grid grid-cols-2 justify-items-center items-center">
                         <DemoVideo
-                        src='../public/videos/changeStatus_demo.mp4'
-                        poster='../public/posterImages/changeStatus.jpg'
+                        src='/videos/changeStatus_demo.mp4'
+                        poster='/posterImages/changeStatus.jpg'
                         label='Change job application status with ease'
                         className='rounded-lg ring-2'
                         />
