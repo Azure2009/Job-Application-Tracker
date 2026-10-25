@@ -7,7 +7,7 @@ A job application tracker where you can linked your gmail account using the GMAI
 
 # Features
 
-- Column view and compact list view, with search by company and filtering by status
+- Column layout view and list layout view, with search by company and filtering by status
 - Add, edit and delete applications, and change status inline
 - One-click Gmail sync that finds application-related emails and creates entries without duplicates
 - Jump from an application straight to its source email in Gmail
@@ -22,6 +22,26 @@ AWS | TypeScript/JavaScript | Express.js(Node.js framework) | Node.js | Tailwind
 
 **Backend:** AWS EC2
 **Frontend:** Vercel
+
+# Connect your Gmail and Sync emails
+
+![Connect and Sync](./frontend//public/gifs/syncEmails_demo.gif)
+
+# Change status easily
+
+![Change status](./frontend//public/gifs/changeStatus_demo.gif)
+
+# Add application
+
+![Add application](./frontend//public/gifs/addApplication_demo.gif)
+
+# Delete application
+
+![Delete application](./frontend//public/gifs/deleteApplication_demo.gif)
+
+# Update application
+
+![Update application](./frontend//public/gifs/updateApplication_demo.gif)
 
 ## Getting started
  
