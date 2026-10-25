@@ -20,8 +20,8 @@ AWS | TypeScript/JavaScript | Express.js(Node.js framework) | Node.js | Tailwind
 
 # Services used for deployment
 
-Backend: AWS EC2
-Frontend: Vercel
+**Backend:** AWS EC2
+**Frontend:** Vercel
 
 ## Getting started
  
