@@ -14,6 +14,15 @@ A job application tracker where you can linked your gmail account using the GMAI
 - Registration and login, with every user's data kept private to them
 - Responsive layout for mobile, tablet and desktop
 
+# Teck Stack
+
+AWS | TypeScript/JavaScript | Express.js(Node.js framework) | Node.js | Tailwind CSS | PostgreSQL | React.js
+
+# Services used for deployment
+
+Backend: AWS EC2
+Frontend: Vercel
+
 ## Getting started
  
 ### Prerequisites
@@ -25,8 +34,8 @@ A job application tracker where you can linked your gmail account using the GMAI
 ### 1. Clone and install
  
 ```bash
-git clone https://github.com/Azure2009/<your-repo-name>.git
-cd <your-repo-name>
+git clone https://github.com/Azure2009/Job-Application-Tracker.git
+cd Job_Application_Tracker
  
 cd backend && npm install
 cd ../frontend && npm install
